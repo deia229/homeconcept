@@ -629,7 +629,7 @@ function exportPagamentosExcel(){
   let rows='';
   cols.forEach((c,i)=>{
     const d=calcCol(c,mes);
-    const liquido=Math.max(0,d.liquido);
+    const liquido=Math.max(0,d.bruto-d.descFaltas-d.ss_emp);
     const transferir=Math.max(0,liquido-d.totalAdiant);
     totalLiquido+=liquido;
     totalAdiant+=d.totalAdiant;
