@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HomeConcept · Gestão RH & Obras</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">HomeConcept</div>
+    <div class="login-sub">Gestão RH & Obras</div>
+    <span class="login-accent"></span>
+    <label class="login-label">Password</label>
+    <input type="password" class="login-input" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" onclick="doLogin()">Entrar</button>
+    <div class="login-error" id="login-error">Password incorreta.</div>
+  </div>
+</div>
+
+<div id="app">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-name">HomeConcept</div>
+      <div class="sidebar-brand-sub">RH · Ordenados · Obras</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Geral</div>
+      <div class="nav-item active" onclick="showPage('dashboard')">
+        <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard
+      </div>
+      <div class="nav-section-label">Recursos Humanos</div>
+      <div class="nav-item" onclick="showPage('folha')">
+        <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>Folha de Salários
+      </div>
+      <div class="nav-item" onclick="showPage('registo')">
+        <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>Registar Ocorrência
+      </div>
+      <div class="nav-item" onclick="showPage('colaboradores')">
+        <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Colaboradores
+      </div>
+      <div class="nav-item" onclick="showPage('historico')">
+        <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Histórico
+      </div>
+      <div class="nav-item" onclick="showPage('ferias')">
+        <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Férias
+      </div>
+      <div class="nav-item" onclick="showPage('validacao')">
+        <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>Validação Mensal
+      </div>
+      <div class="nav-section-label">Obras & Custos</div>
+      <div class="nav-item" onclick="showPage('obras')">
+        <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>Obras
+      </div>
+      <div class="nav-item" onclick="showPage('faturas')">
+        <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Faturas
+      </div>
+      <div class="nav-item" onclick="showPage('custos')">
+        <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Custos por Obra
+      </div>
+    </nav>
+    <div class="sidebar-bottom">
+      <button class="logout-btn" onclick="exportarDados()" style="margin-bottom:8px;color:rgba(255,255,255,.5)">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Exportar dados
+      </button>
+      <label class="logout-btn" style="margin-bottom:8px;color:rgba(255,255,255,.5);cursor:pointer">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Importar dados
+        <input type="file" accept=".json" style="display:none" onchange="importarDados(this)">
+      </label>
+      <button class="logout-btn" onclick="doLogout()">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Terminar sessão
+      </button>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <!-- ══════════ DASHBOARD ══════════ -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-header"><div><div class="page-title">Dashboard</div><div class="page-sub">Visão geral · <span id="dash-date"></span></div></div></div>
+      <div class="month-bar" id="month-bar-dash"></div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-label">Total Bruto RH</div><div class="stat-value pink" id="stat-bruto">—</div><div class="stat-meta">mês selecionado</div></div>
+        <div class="stat-card"><div class="stat-label">Líquido a Pagar</div><div class="stat-value green" id="stat-liquido">—</div><div class="stat-meta">após descontos</div></div>
+        <div class="stat-card"><div class="stat-label">Faturas Obras</div><div class="stat-value cyan" id="stat-faturas-total">—</div><div class="stat-meta">total materiais</div></div>
+        <div class="stat-card"><div class="stat-label">Obras Ativas</div><div class="stat-value orange" id="stat-obras-ativas">—</div><div class="stat-meta">em curso</div></div>
+      </div>
+
+      <!-- Resumo RH -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Resumo de Salários</span>
+          <div style="display:flex;align-items:center;gap:20px">
+            <label class="toggle-wrap" style="cursor:pointer"><label class="toggle-switch"><input type="checkbox" id="dash-show-archived" onchange="renderDashboard()"><span class="toggle-slider"></span></label>Mostrar arquivados</label>
+            <span id="dash-month-label" style="font-size:13px;color:var(--mid)"></span>
+          </div>
+        </div>
+        <table>
+          <thead><tr><th>Cód.</th><th>Nome</th><th>Sal. Base</th><th>Sábados</th><th>Adiant.</th><th>Faltas</th><th>Desc. Faltas</th><th>SS (11%)</th><th>Líquido</th></tr></thead>
+          <tbody id="dash-tbody"></tbody><tfoot id="dash-tfoot"></tfoot>
+        </table>
+      </div>
+
+      <!-- Resumo obras no dashboard -->
+      <div class="card">
+        <div class="card-header"><span class="card-title">Resumo de Obras — Custo Real</span></div>
+        <table>
+          <thead><tr><th>Obra</th><th>Cliente</th><th>Materiais</th><th>Mão de Obra</th><th>Custo Total</th><th>Faturado s/IVA</th><th>Margem</th><th>Estado</th></tr></thead>
+          <tbody id="dash-obras-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══════════ FOLHA ══════════ -->
+    <div class="page" id="page-folha">
+      <div class="page-header">
+        <div><div class="page-title">Folha de Salários</div><div class="page-sub">Cálculo detalhado por colaborador</div></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-ghost" onclick="exportFolha()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>CSV</button>
+          <button class="btn btn-primary" onclick="exportPagamentosExcel()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Pagamentos Excel</button>
+        </div>
+      </div>
+      <div class="month-bar" id="month-bar-folha"></div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title" id="folha-title">Folha de Salários</span>
+          <label class="toggle-wrap"><label class="toggle-switch"><input type="checkbox" id="folha-show-archived" onchange="renderFolha()"><span class="toggle-slider"></span></label>Mostrar arquivados</label>
+        </div>
+        <table>
+          <thead><tr><th>Cód.</th><th>Nome</th><th>Função</th><th>Vencimento</th><th>Duodécimos</th><th>Sábados</th><th>Total Bruto</th><th>Adiant.</th><th>Faltas</th><th>Desc. Faltas</th><th>SS (11%)</th><th>Líquido</th></tr></thead>
+          <tbody id="folha-tbody"></tbody><tfoot id="folha-tfoot"></tfoot>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══════════ REGISTAR ══════════ -->
+    <div class="page" id="page-registo">
+      <div class="page-header"><div><div class="page-title">Registar Ocorrência</div><div class="page-sub">Faltas, adiantamentos e sábados</div></div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+        <!-- FALTA -->
+        <div class="card">
+          <div class="card-header"><span class="card-title">🗓 Registar Falta / Atraso</span></div>
+          <div class="modal-form">
+            <div class="form-group"><label class="form-label">Colaborador</label><select class="form-control" id="falta-colab" onchange="updateFaltaPreview()"></select></div>
+            <div class="two-col">
+              <div class="form-group"><label class="form-label">Data</label><input type="date" class="form-control" id="falta-data" onchange="updateFaltaPreview()"></div>
+              <div class="form-group"><label class="form-label">Tipo</label>
+                <select class="form-control" id="falta-tipo" onchange="toggleFaltaMode()">
+                  <option value="dia">Falta (dia completo)</option>
+                  <option value="hora">Atraso / saída antecipada</option>
+                  <option value="baixa">Baixa médica</option>
+                  <option value="justificada">Justificada</option>
+                </select>
+              </div>
+            </div>
+            <div id="falta-dias-wrap" class="form-group"><label class="form-label">Nº de dias</label><input type="number" class="form-control" id="falta-dias" placeholder="ex: 1" step="0.25" min="0" oninput="updateFaltaPreview()"></div>
+            <div id="falta-horas-wrap" class="form-group" style="display:none"><label class="form-label">Nº de horas</label><input type="number" class="form-control" id="falta-horas" placeholder="ex: 2" step="0.5" min="0" max="8" oninput="updateFaltaPreview()"><div class="form-hint">Desconto = horas ÷ 8 × valor diário</div></div>
+            <div class="form-group"><label class="form-label">Observações</label><input type="text" class="form-control" id="falta-obs" placeholder="Notas..."></div>
+            <div class="calc-preview" id="falta-preview">Seleciona colaborador para ver o desconto calculado.</div>
+          </div>
+          <div class="form-actions"><button class="btn btn-primary" onclick="registarFalta()">Registar</button></div>
+        </div>
+        <!-- ADIANTAMENTO -->
+        <div class="card">
+          <div class="card-header"><span class="card-title">💶 Registar Adiantamento</span></div>
+          <div class="modal-form">
+            <div class="form-group"><label class="form-label">Colaborador</label><select class="form-control" id="adiant-colab"></select></div>
+            <div class="two-col">
+              <div class="form-group"><label class="form-label">Data</label><input type="date" class="form-control" id="adiant-data"></div>
+              <div class="form-group"><label class="form-label">Mês a imputar</label><select class="form-control" id="adiant-mes"></select></div>
+            </div>
+            <div class="form-group"><label class="form-label">Valor (€)</label><input type="number" class="form-control" id="adiant-valor" placeholder="ex: 150.00" step="0.01" min="0"></div>
+            <div class="form-group"><label class="form-label">Observações</label><input type="text" class="form-control" id="adiant-obs" placeholder="Notas..."></div>
+          </div>
+          <div class="form-actions"><button class="btn btn-primary" onclick="registarAdiantamento()">Registar</button></div>
+        </div>
+      </div>
+      <!-- SÁBADOS -->
+      <div class="card">
+        <div class="card-header"><span class="card-title">📅 Registar Sábados Trabalhados</span></div>
+        <div class="four-col" style="padding:20px 24px">
+          <div class="form-group"><label class="form-label">Colaborador</label><select class="form-control" id="sab-colab" onchange="updateSabPreview()"></select></div>
+          <div class="form-group"><label class="form-label">Mês</label><select class="form-control" id="sab-mes"></select></div>
+          <div class="form-group"><label class="form-label">Nº de Sábados</label><input type="number" class="form-control" id="sab-num" placeholder="ex: 2" min="0" max="6" step="1" oninput="updateSabPreview()"></div>
+          <div class="form-group"><label class="form-label">Valor por sábado (€)</label><input type="number" class="form-control" id="sab-valor-unit" placeholder="auto" step="0.01" oninput="updateSabPreview()"></div>
+        </div>
+        <div style="padding:0 24px 8px"><div class="calc-preview" id="sab-preview">Seleciona colaborador para ver o valor por sábado.</div></div>
+        <div class="form-actions"><button class="btn btn-primary" onclick="registarSabados()">Registar Sábados</button></div>
+      </div>
+      <!-- DIAS TRABALHADOS -->
+      <div class="card" style="border-top:4px solid var(--orange)">
+        <div class="card-header">
+          <span class="card-title">📋 Registar Dias Trabalhados</span>
+          <span style="font-size:12px;color:var(--mid)">Ao dia · múltiplos locais/valores permitidos</span>
+        </div>
+        <div class="four-col" style="padding:20px 24px 8px">
+          <div class="form-group"><label class="form-label">Colaborador</label><select class="form-control" id="dias-colab" onchange="updateDiasPreview()"></select></div>
+          <div class="form-group"><label class="form-label">Mês</label><select class="form-control" id="dias-mes"></select></div>
+          <div class="form-group"><label class="form-label">Nº de Dias</label><input type="number" class="form-control" id="dias-num" placeholder="ex: 5" min="1" max="25" step="1" oninput="updateDiasPreview()"></div>
+          <div class="form-group"><label class="form-label">Valor/Dia (€)</label><input type="number" class="form-control" id="dias-valor" placeholder="auto" step="0.01" oninput="updateDiasPreview()"></div>
+        </div>
+        <div class="two-col" style="padding:0 24px 8px">
+          <div class="form-group"><label class="form-label">Local / Descrição <span style="color:#bbb;font-weight:400">(opcional)</span></label><input class="form-control" id="dias-desc" placeholder="ex: Infantado, Montargil, Festas..."></div>
+        </div>
+        <div style="padding:0 24px 8px"><div class="calc-preview" id="dias-preview">Seleciona colaborador para ver o valor por dia.</div></div>
+        <div class="form-actions"><button class="btn btn-primary" style="background:var(--orange)" onclick="registarDiasTrabalhados()">+ Adicionar Registo</button></div>
+      </div>
+      <!-- HORAS EXTRAS -->
+      <div class="card" style="border-top:4px solid #7c3aed">
+        <div class="card-header">
+          <span class="card-title">⏱️ Registar Horas Extras</span>
+          <span style="font-size:12px;color:var(--mid)">Lei portuguesa · +25% 1ª hora · +37,5% seguintes · +50% descanso/feriado</span>
+        </div>
+        <div class="four-col" style="padding:20px 24px 8px">
+          <div class="form-group"><label class="form-label">Colaborador</label><select class="form-control" id="ext-colab" onchange="updateExtrasPreview()"></select></div>
+          <div class="form-group"><label class="form-label">Mês</label><select class="form-control" id="ext-mes"></select></div>
+          <div class="form-group"><label class="form-label">Tipo</label>
+            <select class="form-control" id="ext-tipo" onchange="updateExtrasPreview()">
+              <option value="util_1">Dia útil — 1ª hora (+25%)</option>
+              <option value="util_2">Dia útil — 2ª+ hora (+37,5%)</option>
+              <option value="descanso">Descanso / Feriado (+50%)</option>
+            </select>
+          </div>
+          <div class="form-group"><label class="form-label">Nº de Horas</label><input type="number" class="form-control" id="ext-horas" placeholder="ex: 2" min="0.5" step="0.5" oninput="updateExtrasPreview()"></div>
+        </div>
+        <div style="padding:0 24px 8px"><div class="calc-preview" id="ext-preview">Seleciona colaborador para calcular o valor das horas extra.</div></div>
+        <div class="form-actions"><button class="btn btn-primary" style="background:#7c3aed" onclick="registarHorasExtras()">+ Registar Horas Extras</button></div>
+      </div>
+      <!-- ALOCAÇÃO OBRA -->
+      <div class="card" style="border-top:4px solid var(--cyan)">
+        <div class="card-header">
+          <span class="card-title">🏗️ Alocar Funcionário a Obra</span>
+          <span style="font-size:12px;color:var(--mid)">Registo semanal/mensal</span>
+        </div>
+        <div class="four-col" style="padding:20px 24px">
+          <div class="form-group"><label class="form-label">Colaborador</label><select class="form-control" id="aloc-colab"></select></div>
+          <div class="form-group"><label class="form-label">Obra</label><select class="form-control" id="aloc-obra-sel"></select></div>
+          <div class="form-group"><label class="form-label">Período</label>
+            <select class="form-control" id="aloc-periodo">
+              <option value="">Mês completo</option>
+            </select>
+          </div>
+          <div class="form-group"><label class="form-label">Nº de Dias</label><input type="number" class="form-control" id="aloc-dias" placeholder="ex: 22" min="1" oninput="updateAlocPreview()"></div>
+        </div>
+        <div style="padding:0 24px 8px"><div class="calc-preview" id="aloc-preview">Seleciona colaborador e obra para calcular o custo.</div></div>
+        <div class="form-actions"><button class="btn btn-cyan" onclick="registarAlocacao()">Registar Alocação</button></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><span class="card-title">Registos Recentes</span><button class="btn btn-ghost btn-sm" onclick="limparLog()">Limpar todos</button></div>
+        <div id="log-container"><div class="empty-state"><p>Nenhum registo ainda.</p></div></div>
+      </div>
+    </div>
+
+    <!-- ══════════ COLABORADORES ══════════ -->
+    <div class="page" id="page-colaboradores">
+      <div class="page-header">
+        <div><div class="page-title">Colaboradores</div><div class="page-sub">Gerir equipa</div></div>
+        <button class="btn btn-primary" onclick="openAddColab()">+ Novo Colaborador</button>
+      </div>
+      <div class="month-bar" id="month-bar-colab"></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+        <label class="toggle-switch"><input type="checkbox" id="colab-show-archived" onchange="renderColaboradores()"><span class="toggle-slider"></span></label>
+        <span style="font-size:13px;color:var(--mid)">Mostrar colaboradores arquivados</span>
+      </div>
+      <div class="colab-grid" id="colab-grid"></div>
+    </div>
+
+    <!-- ══════════ HISTÓRICO ══════════ -->
+    <div class="page" id="page-historico">
+      <div class="page-header"><div><div class="page-title">Histórico</div><div class="page-sub">Todos os registos</div></div></div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Registos</span>
+          <div style="display:flex;gap:10px">
+            <select class="form-control" id="hist-filter-colab" style="padding:6px 12px;font-size:13px" onchange="renderHistorico()"><option value="">Todos os colaboradores</option></select>
+            <select class="form-control" id="hist-filter-tipo" style="padding:6px 12px;font-size:13px" onchange="renderHistorico()"><option value="">Todos os tipos</option><option value="falta">Faltas</option><option value="adiantamento">Adiantamentos</option><option value="sabado">Sábados</option><option value="alocacao">Alocações</option><option value="diasTrabalhados">Dias Trabalhados</option><option value="horasExtras">Horas Extras</option></select>
+          </div>
+        </div>
+        <div id="hist-tbody"></div>
+      </div>
+    </div>
+
+    <!-- ══════════ VALIDAÇÃO MENSAL ══════════ -->
+    <div class="page" id="page-validacao">
+      <div class="page-header">
+        <div><div class="page-title">Validação Mensal</div><div class="page-sub">Confirma os registos de cada colaborador antes de processar</div></div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span id="val-resumo" style="font-size:13px;color:var(--mid)"></span>
+          <button class="btn btn-ghost btn-sm" onclick="resetarValidacao()">Reiniciar mês</button>
+        </div>
+      </div>
+      <div class="month-bar" id="month-bar-val"></div>
+
+      <!-- Barra de progresso geral -->
+      <div class="card" style="margin-bottom:16px">
+        <div style="padding:16px 20px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <span style="font-size:13px;font-weight:600">Progresso geral</span>
+            <span id="val-pct" style="font-size:13px;font-weight:700;color:var(--pink)">0%</span>
+          </div>
+          <div class="val-progress"><div class="val-progress-fill" id="val-progress-fill" style="width:0%"></div></div>
+          <div style="display:flex;gap:16px;margin-top:10px;font-size:12px;color:var(--mid)">
+            <span>🟢 <span id="val-n-fechados">0</span> fechados</span>
+            <span>🔴 <span id="val-n-abertos">0</span> em aberto</span>
+            <span>⚪ <span id="val-n-semreg">0</span> sem registos</span>
+          </div>
+        </div>
+      </div>
+
+      <div id="val-lista"></div>
+    </div>
+
+    <!-- ══════════ OBRAS ══════════ -->
+    <div class="page" id="page-obras">
+      <div class="page-header">
+        <div><div class="page-title">Obras</div><div class="page-sub">Gestão de projetos</div></div>
+        <button class="btn btn-primary" onclick="openModal('modal-obra')">+ Nova Obra</button>
+      </div>
+      <div class="obras-grid" id="obras-grid">
+        <div style="grid-column:1/-1" class="empty-state"><p>Nenhuma obra criada. Clica em + Nova Obra.</p></div>
+      </div>
+    </div>
+
+    <!-- ══════════ FATURAS ══════════ -->
+    <div class="page" id="page-faturas">
+      <div class="page-header">
+        <div><div class="page-title">Faturas</div><div class="page-sub">Registo de custos de materiais e serviços</div></div>
+        <button class="btn btn-cyan" onclick="openModal('modal-fatura')">📷 Registar Fatura</button>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Todas as Faturas</span>
+          <select class="form-control" id="filter-fat-obra" style="width:auto;padding:6px 12px;font-size:13px" onchange="renderFaturas()">
+            <option value="">Todas as obras</option>
+          </select>
+        </div>
+        <table>
+          <thead><tr><th>Data</th><th>Fornecedor</th><th>Descrição</th><th>Obra</th><th>Valor</th><th>Origem</th><th></th></tr></thead>
+          <tbody id="faturas-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══════════ CUSTOS POR OBRA ══════════ -->
+    <div class="page" id="page-custos">
+      <div class="page-header"><div><div class="page-title">Custos por Obra</div><div class="page-sub">Materiais + Mão de obra = Custo real</div></div></div>
+      <div id="custos-content"></div>
+    </div>
+
+
+    <!-- ══════════ FÉRIAS ══════════ -->
+    <div class="page" id="page-ferias">
+      <div class="page-header">
+        <div><div class="page-title">Férias</div><div class="page-sub">Marcação e vista mensal de férias</div></div>
+        <button class="btn btn-primary" onclick="openModal('modal-ferias')">+ Marcar Férias</button>
+      </div>
+
+      <!-- Calendário mensal -->
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-header">
+          <span class="card-title">Vista Mensal</span>
+          <div style="display:flex;align-items:center;gap:10px">
+            <button class="btn btn-ghost btn-sm" onclick="mudaMesFerias(-1)">&#8592;</button>
+            <span id="ferias-mes-label" style="font-size:14px;font-weight:600;min-width:120px;text-align:center"></span>
+            <button class="btn btn-ghost btn-sm" onclick="mudaMesFerias(1)">&#8594;</button>
+          </div>
+        </div>
+        <div style="overflow-x:auto">
+          <div id="ferias-calendario" style="padding:16px 20px"></div>
+        </div>
+      </div>
+
+      <!-- Lista de férias marcadas -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Todas as Férias Marcadas</span>
+          <select class="form-control" id="filter-ferias-colab" style="width:auto;padding:6px 12px;font-size:13px" onchange="renderFerias()">
+            <option value="">Todos os colaboradores</option>
+          </select>
+        </div>
+        <table>
+          <thead><tr><th>Colaborador</th><th>Data Início</th><th>Data Fim</th><th>Dias</th><th>Ano</th><th></th></tr></thead>
+          <tbody id="ferias-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+
+<!-- MODAL FÉRIAS -->
+<div class="modal-overlay" id="modal-ferias">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">Marcar Férias</div><button class="modal-close" onclick="closeModal('modal-ferias')">×</button></div>
+    <div class="modal-body">
+      <div class="form-group" style="margin-bottom:14px">
+        <label class="form-label">Colaborador</label>
+        <select class="form-control" id="fer-colab"></select>
+      </div>
+      <div class="two-col" style="margin-bottom:14px">
+        <div class="form-group"><label class="form-label">Data Início</label><input type="date" class="form-control" id="fer-inicio" onchange="calcDiasFerias()"></div>
+        <div class="form-group"><label class="form-label">Data Fim</label><input type="date" class="form-control" id="fer-fim" onchange="calcDiasFerias()"></div>
+      </div>
+      <div class="calc-preview" id="fer-preview" style="margin-bottom:14px">Seleciona as datas para ver o total de dias.</div>
+      <div class="form-group">
+        <label class="form-label">Observações</label>
+        <input class="form-control" id="fer-obs" placeholder="Notas opcionais...">
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeModal('modal-ferias')">Cancelar</button>
+        <button class="btn btn-primary" onclick="addFerias()">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL OBRA -->
+<div class="modal-overlay" id="modal-obra">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">Nova Obra</div><button class="modal-close" onclick="closeModal('modal-obra')">×</button></div>
+    <div class="modal-body">
+      <div class="two-col" style="margin-bottom:14px">
+        <div class="form-group"><label class="form-label">Nome da Obra</label><input class="form-control" id="obra-nome" placeholder="Ex: Apartamento Av. Roma"></div>
+        <div class="form-group"><label class="form-label">Código</label><input class="form-control" id="obra-codigo" placeholder="OB-2025-001"></div>
+      </div>
+      <div class="form-group" style="margin-bottom:14px"><label class="form-label">Cliente</label><input class="form-control" id="obra-cliente" placeholder="Nome do cliente"></div>
+      <div class="two-col" style="margin-bottom:14px">
+        <div class="form-group"><label class="form-label">Data Início</label><input type="date" class="form-control" id="obra-inicio"></div>
+        <div class="form-group"><label class="form-label">Estado</label>
+          <select class="form-control" id="obra-estado">
+            <option value="ativa">Ativa</option>
+            <option value="concluida">Concluída</option>
+            <option value="pausada">Pausada</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group" style="margin-bottom:14px">
+        <label class="form-label">Valor Faturado ao Cliente (s/ IVA) <span style="color:#bbb;font-weight:400;text-transform:none;letter-spacing:0">— opcional</span></label>
+        <input type="number" class="form-control" id="obra-faturado" placeholder="ex: 15000.00" step="0.01" min="0">
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeModal('modal-obra')">Cancelar</button>
+        <button class="btn btn-primary" onclick="addObra()">Criar Obra</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL FATURA -->
+<div class="modal-overlay" id="modal-fatura">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">Registar Fatura</div><button class="modal-close" onclick="closeModal('modal-fatura')">×</button></div>
+    <div class="modal-body">
+      <div class="ocr-drop" id="ocr-drop" onclick="document.getElementById('foto-input').click()">
+        <div style="font-size:32px">📷</div>
+        <strong>Tirar foto ou carregar fatura</strong>
+        <p>Clica para selecionar imagem — a IA extrai os dados automaticamente</p>
+        <input type="file" id="foto-input" accept="image/*,application/pdf" style="display:none" onchange="handleFoto(this)">
+      </div>
+      <div class="ai-status" id="ai-status"><div class="spinner"></div><span id="ai-status-text">A analisar...</span></div>
+      <div class="two-col" style="margin-bottom:14px">
+        <div class="form-group"><label class="form-label">Fornecedor</label><input class="form-control" id="fat-fornecedor" placeholder="Nome do fornecedor"></div>
+        <div class="form-group"><label class="form-label">Data</label><input type="date" class="form-control" id="fat-data"></div>
+      </div>
+      <div class="form-group" style="margin-bottom:14px"><label class="form-label">Descrição</label><input class="form-control" id="fat-descricao" placeholder="Materiais / serviços"></div>
+      <div class="two-col">
+        <div class="form-group"><label class="form-label">Valor Total (€)</label><input type="number" class="form-control" id="fat-valor" placeholder="0.00" step="0.01"></div>
+        <div class="form-group"><label class="form-label">Obra</label><select class="form-control" id="fat-obra"><option value="">Selecionar obra...</option></select></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeModal('modal-fatura')">Cancelar</button>
+        <button class="btn btn-primary" onclick="addFatura()">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL COLABORADOR -->
+<div class="modal-overlay" id="modal-colab">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title" id="modal-colab-title">Novo Colaborador</div><button class="modal-close" onclick="closeModal('modal-colab')">×</button></div>
+    <div class="modal-body">
+      <div class="modal-section">Identificação</div>
+      <div class="three-col" style="margin-bottom:14px">
+        <div class="form-group"><label class="form-label">Código</label><input class="form-control" id="nc-id" placeholder="ex: 11"></div>
+        <div class="form-group" style="grid-column:span 2"><label class="form-label">Nome completo</label><input class="form-control" id="nc-nome" placeholder="Nome Completo"></div>
+      </div>
+      <div class="form-group" style="margin-bottom:14px"><label class="form-label">Função / Cargo</label><input class="form-control" id="nc-funcao" placeholder="ex: Pintor, Ajudante..."></div>
+      <div class="modal-section">Valores Salariais</div>
+      <div class="two-col" style="margin-bottom:14px">
+        <div class="form-group"><label class="form-label">Salário base (€/mês)</label><input type="number" class="form-control" id="nc-salario" placeholder="ex: 1255" step="0.01" min="0"></div>
+        <div class="form-group"><label class="form-label">Valor diário (€/dia)</label><input type="number" class="form-control" id="nc-valordia" placeholder="ex: 60" step="0.01" min="0"><div class="form-hint">Para desconto de faltas</div></div>
+      </div>
+      <div class="two-col" style="margin-bottom:14px">
+        <div class="form-group"><label class="form-label">Duodécimos (€/mês)</label><input type="number" class="form-control" id="nc-duodecimos" placeholder="ex: 153.33" step="0.01" min="0"></div>
+        <div class="form-group"><label class="form-label">Valor por sábado (€)</label><input type="number" class="form-control" id="nc-sabado" placeholder="ex: 70" step="0.01" min="0"></div>
+      </div>
+      <div class="modal-section">Segurança Social</div>
+      <div class="radio-group">
+        <label class="radio-opt" id="ss-sim-label"><input type="radio" name="nc-ss" value="sim" onchange="selectSS(this)"> Sim — desconta 11%</label>
+        <label class="radio-opt" id="ss-nao-label"><input type="radio" name="nc-ss" value="nao" onchange="selectSS(this)"> Não — recibo verde/isento</label>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeModal('modal-colab')">Cancelar</button>
+        <button class="btn btn-primary" onclick="guardarColaborador()">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
