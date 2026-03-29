@@ -1,3 +1,9 @@
+// ════ SUPABASE ════
+const SUPABASE_URL='https://fsbpakhrfkrmfgpaxyly.supabase.co';
+const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzYnBha2hyZmtybWZncGF4eWx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1NzMyMjAsImV4cCI6MjA4OTE0OTIyMH0.fkF9Ch9QvX2lecY1B2FxuDWxD4DmH4T6WAg6ggYBVlY';
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+function dbErr(e,op){if(e){console.error(op,e);showToast('Erro ao guardar ('+op+'): '+e.message,'error');}}
+
 // ════ DADOS BASE ════
 const COLABORADORES_BASE=[
   {id:'IA',nome:'Ivo Miguel Silva Almeida',funcao:'',salario:665,valorDia:0,ss:true,duodecimos:0,sabados_rate:0,archived:false},
@@ -20,34 +26,17 @@ const COLABORADORES_BASE=[
 ];
 const MESES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
-let colaboradores=JSON.parse(localStorage.getItem('hc_colaboradores')||'null');
-if(!colaboradores){colaboradores=COLABORADORES_BASE;saveCols();}
-else{
-  // Adicionar novos colaboradores do base que ainda não existam no localStorage
-  let changed=false;
-  COLABORADORES_BASE.forEach(b=>{
-    if(!colaboradores.find(c=>c.id===b.id)){
-      colaboradores.push(b);changed=true;
-    }
-  });
-  if(changed)saveCols();
-}
+let colaboradores=[], registos=[], obras=[], faturas=[], alocacoes=[];
 const REGISTOS_MARCO_2026=[{"id": 1743000001, "tipo": "sabado", "colaborador": "EZ", "mes": "Março", "numSabados": 3, "valorUnit": 76, "totalValor": 228, "data": "2026-03-25"}, {"id": 1743000002, "tipo": "sabado", "colaborador": "09", "mes": "Março", "numSabados": 1, "valorUnit": 90, "totalValor": 90, "data": "2026-03-25"}, {"id": 1743000003, "tipo": "sabado", "colaborador": "08", "mes": "Março", "numSabados": 2, "valorUnit": 77.86, "totalValor": 155.72, "data": "2026-03-25"}, {"id": 1743000004, "tipo": "sabado", "colaborador": "03", "mes": "Março", "numSabados": 3, "valorUnit": 100, "totalValor": 300, "data": "2026-03-25"}, {"id": 1743000005, "tipo": "sabado", "colaborador": "04", "mes": "Março", "numSabados": 1, "valorUnit": 104.58, "totalValor": 104.58, "data": "2026-03-25"}, {"id": 1743000006, "tipo": "sabado", "colaborador": "02", "mes": "Março", "numSabados": 1, "valorUnit": 75, "totalValor": 75, "data": "2026-03-25"}, {"id": 1743000007, "tipo": "falta", "colaborador": "10", "data": "2026-03-20", "modo": "dia", "dias": 1, "tipoFalta": "Injustificada", "obs": "", "mes": "Março"}, {"id": 1743000008, "tipo": "falta", "colaborador": "WL", "data": "2026-03-20", "modo": "hora", "horas": 1, "tipoFalta": "Atraso", "obs": "", "mes": "Março"}, {"id": 1743000009, "tipo": "falta", "colaborador": "WL", "data": "2026-03-19", "modo": "dia", "dias": 1, "tipoFalta": "Injustificada", "obs": "", "mes": "Março"}, {"id": 1743000010, "tipo": "falta", "colaborador": "WL", "data": "2026-03-13", "modo": "dia", "dias": 1, "tipoFalta": "Injustificada", "obs": "", "mes": "Março"}, {"id": 1743000011, "tipo": "falta", "colaborador": "03", "data": "2026-03-05", "modo": "hora", "horas": 3, "tipoFalta": "Atraso", "obs": "", "mes": "Março"}, {"id": 1743000012, "tipo": "falta", "colaborador": "09", "data": "2026-03-05", "modo": "dia", "dias": 1, "tipoFalta": "Injustificada", "obs": "", "mes": "Março"}, {"id": 1743000013, "tipo": "falta", "colaborador": "10", "data": "2026-03-04", "modo": "dia", "dias": 1, "tipoFalta": "Injustificada", "obs": "", "mes": "Março"}, {"id": 1743000014, "tipo": "falta", "colaborador": "09", "data": "2026-03-03", "modo": "dia", "dias": 1, "tipoFalta": "Injustificada", "obs": "", "mes": "Março"}, {"id": 1743000015, "tipo": "falta", "colaborador": "WL", "data": "2026-03-02", "modo": "dia", "dias": 1, "tipoFalta": "Injustificada", "obs": "", "mes": "Março"}, {"id": 1743000016, "tipo": "adiantamento", "colaborador": "BR", "data": "2026-03-24", "mes": "Março", "valor": 20, "obs": ""}, {"id": 1743000017, "tipo": "adiantamento", "colaborador": "BR", "data": "2026-03-18", "mes": "Março", "valor": 50, "obs": ""}, {"id": 1743000018, "tipo": "adiantamento", "colaborador": "WL", "data": "2026-03-18", "mes": "Março", "valor": 60, "obs": ""}, {"id": 1743000019, "tipo": "adiantamento", "colaborador": "10", "data": "2026-03-13", "mes": "Março", "valor": 200, "obs": ""}, {"id": 1743000020, "tipo": "adiantamento", "colaborador": "WL", "data": "2026-03-11", "mes": "Março", "valor": 100, "obs": ""}, {"id": 1743000021, "tipo": "adiantamento", "colaborador": "BR", "data": "2026-03-11", "mes": "Março", "valor": 20, "obs": ""}, {"id": 1743000022, "tipo": "adiantamento", "colaborador": "BR", "data": "2026-03-06", "mes": "Março", "valor": 350, "obs": ""}, {"id": 1743000023, "tipo": "diasTrabalhados", "colaborador": "HV", "mes": "Março", "dias": 11, "valorDia": 60, "total": 660, "data": "2026-03-25"}];
-let registos=JSON.parse(localStorage.getItem('hc_registos')||'null');
-if(!registos||registos.length===0){registos=REGISTOS_MARCO_2026;localStorage.setItem('hc_registos',JSON.stringify(registos));}
-// remover falta duplicada do Jhonata a 11-03-2026
-{const antes=registos.length;registos=registos.filter(r=>!(r.colaborador==='10'&&r.tipo==='falta'&&r.data==='2026-03-11'));if(registos.length<antes)localStorage.setItem('hc_registos',JSON.stringify(registos));}
-let obras=JSON.parse(localStorage.getItem('hc_obras')||'[]');
-let faturas=JSON.parse(localStorage.getItem('hc_faturas')||'[]');
-let alocacoes=JSON.parse(localStorage.getItem('hc_alocacoes')||'[]');
 let currentMonth={dash:new Date().getMonth()+1,folha:new Date().getMonth()+1,colab:new Date().getMonth()+1};
 let editingColabId=null;
 
-function saveCols(){localStorage.setItem('hc_colaboradores',JSON.stringify(colaboradores));}
-function saveRegs(){localStorage.setItem('hc_registos',JSON.stringify(registos));}
-function saveObras(){localStorage.setItem('hc_obras',JSON.stringify(obras));}
-function saveFaturas(){localStorage.setItem('hc_faturas',JSON.stringify(faturas));}
-function saveAloc(){localStorage.setItem('hc_alocacoes',JSON.stringify(alocacoes));}
+// Funções de save (usadas no import — operações individuais usam sb diretamente)
+async function saveCols(){const{error}=await sb.from('colaboradores').upsert(colaboradores);dbErr(error,'saveCols');}
+async function saveRegs(){await sb.from('registos').delete().gte('id',0);if(registos.length){const{error}=await sb.from('registos').insert(registos);dbErr(error,'saveRegs');}}
+async function saveObras(){const{error}=await sb.from('obras').upsert(obras);dbErr(error,'saveObras');}
+async function saveFaturas(){const{error}=await sb.from('faturas').upsert(faturas);dbErr(error,'saveFaturas');}
+async function saveAloc(){const{error}=await sb.from('alocacoes').upsert(alocacoes);dbErr(error,'saveAloc');}
 
 // ════ CÁLCULOS RH ════
 function calcCol(c,mes){
@@ -231,8 +220,10 @@ function addObra(){
   const estado=document.getElementById('obra-estado').value;
   const faturado=parseFloat(document.getElementById('obra-faturado').value)||0;
   if(!nome){showToast('Insere o nome da obra.','error');return;}
-  obras.push({id:Date.now().toString(),nome,codigo,cliente,inicio,estado,faturado});
-  saveObras();closeModal('modal-obra');
+  const novaObra={id:Date.now().toString(),nome,codigo,cliente,inicio,estado,faturado};
+  obras.push(novaObra);
+  sb.from('obras').insert(novaObra).then(({error})=>dbErr(error,'addObra'));
+  closeModal('modal-obra');
   ['obra-nome','obra-codigo','obra-cliente','obra-inicio','obra-faturado'].forEach(i=>document.getElementById(i).value='');
   renderObras();populateAllSelects();showToast('Obra criada!','success');
 }
@@ -338,8 +329,10 @@ function addFatura(){
   const valor=parseFloat(document.getElementById('fat-valor').value);
   const obraId=document.getElementById('fat-obra').value;
   if(!fornecedor||!valor||!obraId){showToast('Preenche fornecedor, valor e obra.','error');return;}
-  faturas.push({id:Date.now().toString(),fornecedor,data,descricao,valor,obraId,origem:'IA'});
-  saveFaturas();closeModal('modal-fatura');
+  const novaFatura={id:Date.now().toString(),fornecedor,data,descricao,valor,obraId,origem:'IA'};
+  faturas.push(novaFatura);
+  sb.from('faturas').insert(novaFatura).then(({error})=>dbErr(error,'addFatura'));
+  closeModal('modal-fatura');
   ['fat-fornecedor','fat-data','fat-descricao','fat-valor'].forEach(i=>document.getElementById(i).value='');
   document.getElementById('fat-obra').value='';
   document.getElementById('ai-status').className='ai-status';
@@ -361,7 +354,9 @@ function renderFaturas(){
 
 function deleteFatura(id){
   if(!confirm('Apagar esta fatura?'))return;
-  faturas=faturas.filter(f=>f.id!==id);saveFaturas();renderFaturas();renderObras();renderDashboard();showToast('Fatura apagada.','success');
+  faturas=faturas.filter(f=>f.id!==id);
+  sb.from('faturas').delete().eq('id',id).then(({error})=>dbErr(error,'deleteFatura'));
+  renderFaturas();renderObras();renderDashboard();showToast('Fatura apagada.','success');
 }
 
 // ════ ALOCAÇÕES ════
@@ -382,8 +377,10 @@ function registarAlocacao(){
   const periodo=document.getElementById('aloc-periodo').value;
   const dias=parseInt(document.getElementById('aloc-dias').value);
   if(!colabId||!obraId||!dias||dias<=0){showToast('Preenche todos os campos.','error');return;}
-  alocacoes.push({id:Date.now(),colabId,obraId,periodo,dias,data:new Date().toISOString().split('T')[0]});
-  saveAloc();renderLog();renderObras();renderDashboard();renderHistorico();
+  const novaAloc={id:Date.now(),colabId,obraId,periodo,dias,data:new Date().toISOString().split('T')[0]};
+  alocacoes.push(novaAloc);
+  sb.from('alocacoes').insert(novaAloc).then(({error})=>dbErr(error,'registarAlocacao'));
+  renderLog();renderObras();renderDashboard();renderHistorico();
   document.getElementById('aloc-dias').value='';
   document.getElementById('aloc-preview').textContent='';
   showToast('Alocação registada!','success');
@@ -449,9 +446,12 @@ function registarFalta(){
   const obs=document.getElementById('falta-obs').value;
   if(!colab||!data){showToast('Preenche colaborador e data.','error');return;}
   const mes=MESES[new Date(data).getMonth()];
-  if(tipo==='hora'){const horas=parseFloat(document.getElementById('falta-horas').value);if(!horas||horas<=0){showToast('Introduz o nº de horas.','error');return;}registos.push({tipo:'falta',colaborador:colab,data,modo:'hora',horas,tipoFalta:'Atraso',obs,mes,id:Date.now()});document.getElementById('falta-horas').value='';}
-  else{const dias=parseFloat(document.getElementById('falta-dias').value);if(!dias||dias<=0){showToast('Introduz o nº de dias.','error');return;}const tf=tipo==='baixa'?'Baixa médica':tipo==='justificada'?'Justificada':'Injustificada';registos.push({tipo:'falta',colaborador:colab,data,modo:'dia',dias,tipoFalta:tf,obs,mes,id:Date.now()});document.getElementById('falta-dias').value='';}
-  document.getElementById('falta-obs').value='';saveRegs();renderLog();renderDashboard();showToast('Falta registada!','success');
+  let novoReg;
+  if(tipo==='hora'){const horas=parseFloat(document.getElementById('falta-horas').value);if(!horas||horas<=0){showToast('Introduz o nº de horas.','error');return;}novoReg={tipo:'falta',colaborador:colab,data,modo:'hora',horas,tipoFalta:'Atraso',obs,mes,id:Date.now()};document.getElementById('falta-horas').value='';}
+  else{const dias=parseFloat(document.getElementById('falta-dias').value);if(!dias||dias<=0){showToast('Introduz o nº de dias.','error');return;}const tf=tipo==='baixa'?'Baixa médica':tipo==='justificada'?'Justificada':'Injustificada';novoReg={tipo:'falta',colaborador:colab,data,modo:'dia',dias,tipoFalta:tf,obs,mes,id:Date.now()};document.getElementById('falta-dias').value='';}
+  registos.push(novoReg);
+  sb.from('registos').insert(novoReg).then(({error})=>dbErr(error,'registarFalta'));
+  document.getElementById('falta-obs').value='';renderLog();renderDashboard();showToast('Falta registada!','success');
 }
 function registarAdiantamento(){
   const colab=document.getElementById('adiant-colab').value;
@@ -460,9 +460,11 @@ function registarAdiantamento(){
   const valor=parseFloat(document.getElementById('adiant-valor').value);
   const obs=document.getElementById('adiant-obs').value;
   if(!colab||!data||!mes||!valor||valor<=0){showToast('Preenche todos os campos.','error');return;}
-  registos.push({tipo:'adiantamento',colaborador:colab,data,mes,valor,obs,id:Date.now()});
+  const novoAdiant={tipo:'adiantamento',colaborador:colab,data,mes,valor,obs,id:Date.now()};
+  registos.push(novoAdiant);
+  sb.from('registos').insert(novoAdiant).then(({error})=>dbErr(error,'registarAdiantamento'));
   document.getElementById('adiant-valor').value='';document.getElementById('adiant-obs').value='';
-  saveRegs();renderLog();renderDashboard();showToast('Adiantamento registado!','success');
+  renderLog();renderDashboard();showToast('Adiantamento registado!','success');
 }
 function updateDiasPreview(){
   const cid=document.getElementById('dias-colab').value;
@@ -485,10 +487,12 @@ function registarDiasTrabalhados(){
   const desc=document.getElementById('dias-desc')?.value.trim()||'';
   if(!colab||!mes||!num||num<=0||!val||val<=0){showToast('Preenche todos os campos.','error');return;}
   // Permite múltiplos registos (ex: Aurora em locais diferentes)
-  registos.push({tipo:'diasTrabalhados',colaborador:colab,mes,dias:num,valorDia:val,total:num*val,descricao:desc,data:new Date().toISOString().split('T')[0],id:Date.now()});
+  const novoDias={tipo:'diasTrabalhados',colaborador:colab,mes,dias:num,valorDia:val,total:num*val,descricao:desc,data:new Date().toISOString().split('T')[0],id:Date.now()};
+  registos.push(novoDias);
+  sb.from('registos').insert(novoDias).then(({error})=>dbErr(error,'registarDias'));
   document.getElementById('dias-num').value='';document.getElementById('dias-valor').value='';document.getElementById('dias-desc').value='';
   document.getElementById('dias-preview').textContent='Seleciona colaborador para ver o valor por dia.';
-  saveRegs();renderLog();renderDashboard();
+  renderLog();renderDashboard();
   showToast(`${num} dias${desc?' ('+desc+')':''} = ${fmt(num*val)}`,'success');
 }
 
@@ -530,10 +534,12 @@ function registarHorasExtras(){
   const valorHora=calcValorHoraExtra(c,tipo);
   const total=horas*valorHora;
   const tipoLabel=tipo==='util_1'?'Dia útil 1ª hora (+25%)':tipo==='util_2'?'Dia útil 2ª+ hora (+37,5%)':'Descanso/Feriado (+50%)';
-  registos.push({tipo:'horasExtras',colaborador:colab,mes,tipoExtra:tipo,tipoLabel,horas,valorHora,total,data:new Date().toISOString().split('T')[0],id:Date.now()});
+  const novoExtra={tipo:'horasExtras',colaborador:colab,mes,tipoExtra:tipo,tipoLabel,horas,valorHora,total,data:new Date().toISOString().split('T')[0],id:Date.now()};
+  registos.push(novoExtra);
+  sb.from('registos').insert(novoExtra).then(({error})=>dbErr(error,'registarExtras'));
   document.getElementById('ext-horas').value='';
   document.getElementById('ext-preview').textContent='Seleciona colaborador para calcular o valor das horas extra.';
-  saveRegs();renderLog();renderDashboard();
+  renderLog();renderDashboard();
   showToast(`${horas}h extras = ${fmt(total)}`,'success');
 }
 
@@ -554,11 +560,13 @@ function registarSabados(){
   const num=parseFloat(document.getElementById('sab-num').value);
   const unit=parseFloat(document.getElementById('sab-valor-unit').value);
   if(!colab||!mes||!num||num<=0||!unit||unit<=0){showToast('Preenche todos os campos.','error');return;}
-  registos.push({tipo:'sabado',colaborador:colab,mes,numSabados:num,valorUnit:unit,totalValor:num*unit,data:new Date().toISOString().split('T')[0],id:Date.now()});
+  const novoSab={tipo:'sabado',colaborador:colab,mes,numSabados:num,valorUnit:unit,totalValor:num*unit,data:new Date().toISOString().split('T')[0],id:Date.now()};
+  registos.push(novoSab);
+  sb.from('registos').insert(novoSab).then(({error})=>dbErr(error,'registarSabados'));
   document.getElementById('sab-num').value='';document.getElementById('sab-valor-unit').value='';
-  saveRegs();renderLog();renderDashboard();showToast(`Sábados: ${num}× = ${fmt(num*unit)}`,'success');
+  renderLog();renderDashboard();showToast(`Sábados: ${num}× = ${fmt(num*unit)}`,'success');
 }
-function limparLog(){if(!confirm('Apagar TODOS os registos?'))return;registos=[];saveRegs();renderLog();renderDashboard();showToast('Registos apagados.','success');}
+function limparLog(){if(!confirm('Apagar TODOS os registos?'))return;registos=[];sb.from('registos').delete().gte('id',0).then(({error})=>dbErr(error,'limparLog'));renderLog();renderDashboard();showToast('Registos apagados.','success');}
 
 // ════ COLABORADORES ════
 function openAddColab(){editingColabId=null;document.getElementById('modal-colab-title').textContent='Novo Colaborador';['nc-id','nc-nome','nc-funcao','nc-salario','nc-valordia','nc-duodecimos','nc-sabado'].forEach(id=>document.getElementById(id).value='');document.getElementById('nc-id').disabled=false;document.querySelectorAll('[name="nc-ss"]').forEach(r=>r.checked=false);document.querySelectorAll('.radio-opt').forEach(l=>l.classList.remove('selected'));openModal('modal-colab');}
@@ -576,11 +584,21 @@ function guardarColaborador(){
   if(!id||!nome){showToast('Código e nome são obrigatórios.','error');return;}
   if(!editingColabId&&colaboradores.find(c=>c.id===id)){showToast('Código já existe.','error');return;}
   const ss=ssEl?ssEl.value==='sim':false;
-  if(editingColabId){const i=colaboradores.findIndex(c=>c.id===editingColabId);colaboradores[i]={...colaboradores[i],nome,funcao,salario,valorDia,duodecimos,sabados_rate,ss};showToast('Colaborador atualizado!','success');}
-  else{colaboradores.push({id,nome,funcao,salario,valorDia,ss,duodecimos,sabados_rate,archived:false});showToast(`${nome} adicionado!`,'success');}
-  saveCols();closeModal('modal-colab');populateAllSelects();renderColaboradores();renderDashboard();
+  if(editingColabId){
+    const i=colaboradores.findIndex(c=>c.id===editingColabId);
+    const upd={...colaboradores[i],nome,funcao,salario,valorDia,duodecimos,sabados_rate,ss};
+    colaboradores[i]=upd;
+    sb.from('colaboradores').update({nome,funcao,salario,valorDia,duodecimos,sabados_rate,ss}).eq('id',editingColabId).then(({error})=>dbErr(error,'editColab'));
+    showToast('Colaborador atualizado!','success');
+  } else {
+    const novoColab={id,nome,funcao,salario,valorDia,ss,duodecimos,sabados_rate,archived:false};
+    colaboradores.push(novoColab);
+    sb.from('colaboradores').insert(novoColab).then(({error})=>dbErr(error,'addColab'));
+    showToast(`${nome} adicionado!`,'success');
+  }
+  closeModal('modal-colab');populateAllSelects();renderColaboradores();renderDashboard();
 }
-function toggleArchive(id){const c=colaboradores.find(x=>x.id===id);if(!c)return;if(!confirm(`Tens a certeza?`))return;c.archived=!c.archived;saveCols();renderColaboradores();showToast(c.archived?`${c.nome.split(' ')[0]} arquivado.`:`${c.nome.split(' ')[0]} reativado!`,'success');}
+function toggleArchive(id){const c=colaboradores.find(x=>x.id===id);if(!c)return;if(!confirm(`Tens a certeza?`))return;c.archived=!c.archived;sb.from('colaboradores').update({archived:c.archived}).eq('id',id).then(({error})=>dbErr(error,'toggleArchive'));renderColaboradores();showToast(c.archived?`${c.nome.split(' ')[0]} arquivado.`:`${c.nome.split(' ')[0]} reativado!`,'success');}
 
 // ════ EXPORT ════
 function exportFolha(){
@@ -723,8 +741,56 @@ function doLogin(){
 }
 function doLogout(){document.getElementById('login-screen').style.display='flex';document.getElementById('app').style.display='none';document.getElementById('login-pass').value='';document.getElementById('login-error').style.display='none';}
 
-function initApp(){
+async function initApp(){
+  // ── Carregar dados do Supabase ──
+  try{
+    const [rc,rr,ro,rf,ra,rfer,rv]=await Promise.all([
+      sb.from('colaboradores').select('*'),
+      sb.from('registos').select('*'),
+      sb.from('obras').select('*'),
+      sb.from('faturas').select('*'),
+      sb.from('alocacoes').select('*'),
+      sb.from('ferias').select('*'),
+      sb.from('settings').select('value').eq('key','validacoes').maybeSingle()
+    ]);
 
+    // Seed colaboradores se a tabela estiver vazia
+    if(!rc.data?.length){
+      await sb.from('colaboradores').insert(COLABORADORES_BASE);
+      colaboradores=COLABORADORES_BASE;
+    } else {
+      colaboradores=rc.data;
+      // Adicionar colaboradores novos do base que ainda não existam
+      const novos=COLABORADORES_BASE.filter(b=>!colaboradores.find(c=>c.id===b.id));
+      if(novos.length){await sb.from('colaboradores').insert(novos);colaboradores=[...colaboradores,...novos];}
+    }
+
+    // Seed registos se a tabela estiver vazia
+    if(!rr.data?.length){
+      const seed=REGISTOS_MARCO_2026.filter(r=>!(r.colaborador==='10'&&r.tipo==='falta'&&r.data==='2026-03-11'));
+      await sb.from('registos').insert(seed);
+      registos=seed;
+    } else {
+      registos=rr.data;
+    }
+
+    obras=ro.data||[];
+    faturas=rf.data||[];
+    alocacoes=ra.data||[];
+    ferias=rfer.data||[];
+    validacoes=rv.data?.value||{};
+  }catch(err){
+    console.error('Erro ao carregar dados:',err);
+    showToast('Erro ao ligar ao Supabase.','error');
+  }
+
+  // ── Esconder loading ──
+  document.getElementById('loading-overlay').style.display='none';
+
+  // ── Real-time ──
+  setupRealtime();
+
+  // ── Inicialização da UI ──
   const now=new Date();
   document.getElementById('dash-date').textContent=now.toLocaleDateString('pt-PT',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   const m=now.getMonth()+1;currentMonth={dash:m,folha:m,colab:m};
@@ -744,11 +810,41 @@ function initApp(){
   buildMonthBars();renderDashboard();renderLog();
 }
 
+function setupRealtime(){
+  const reload=async(tabela,cb)=>{const{data}=await sb.from(tabela).select('*');if(data)cb(data);};
+  const paginaAtiva=id=>document.getElementById(id)?.classList.contains('active');
+
+  sb.channel('hc-sync')
+    .on('postgres_changes',{event:'*',schema:'public',table:'registos'},()=>{
+      reload('registos',d=>{registos=d;renderDashboard();renderLog();if(paginaAtiva('page-historico'))renderHistorico();});
+    })
+    .on('postgres_changes',{event:'*',schema:'public',table:'colaboradores'},()=>{
+      reload('colaboradores',d=>{colaboradores=d;renderDashboard();populateAllSelects();if(paginaAtiva('page-colaboradores'))renderColaboradores();});
+    })
+    .on('postgres_changes',{event:'*',schema:'public',table:'obras'},()=>{
+      reload('obras',d=>{obras=d;renderDashboard();populateAllSelects();if(paginaAtiva('page-obras'))renderObras();if(paginaAtiva('page-custos'))renderCustos();});
+    })
+    .on('postgres_changes',{event:'*',schema:'public',table:'faturas'},()=>{
+      reload('faturas',d=>{faturas=d;renderDashboard();if(paginaAtiva('page-faturas'))renderFaturas();if(paginaAtiva('page-custos'))renderCustos();});
+    })
+    .on('postgres_changes',{event:'*',schema:'public',table:'alocacoes'},()=>{
+      reload('alocacoes',d=>{alocacoes=d;renderDashboard();if(paginaAtiva('page-custos'))renderCustos();if(paginaAtiva('page-historico'))renderHistorico();});
+    })
+    .on('postgres_changes',{event:'*',schema:'public',table:'ferias'},()=>{
+      reload('ferias',d=>{ferias=d;if(paginaAtiva('page-ferias')){renderFerias();renderCalendarioFerias();}});
+    })
+    .on('postgres_changes',{event:'*',schema:'public',table:'settings'},async()=>{
+      const{data}=await sb.from('settings').select('value').eq('key','validacoes').maybeSingle();
+      if(data?.value){validacoes=data.value;if(paginaAtiva('page-validacao'))renderValidacao();}
+    })
+    .subscribe();
+}
+
 // ════ FÉRIAS ════
-let ferias = JSON.parse(localStorage.getItem('hc_ferias') || '[]');
+let ferias = [];
 let feriasMesAtual = { ano: new Date().getFullYear(), mes: new Date().getMonth() };
 
-function saveFerias() { localStorage.setItem('hc_ferias', JSON.stringify(ferias)); }
+async function saveFerias() { const{error}=await sb.from('ferias').upsert(ferias);dbErr(error,'saveFerias'); }
 
 function calcDiasFerias() {
   const ini = document.getElementById('fer-inicio').value;
@@ -782,8 +878,9 @@ function addFerias() {
   if (d2 < d1) { showToast('Data de fim inválida.', 'error'); return; }
   const dias = Math.round((d2 - d1) / 86400000) + 1;
   const ano = d1.getFullYear();
-  ferias.push({ id: Date.now(), colabId, inicio, fim, dias, ano, obs });
-  saveFerias();
+  const novasFerias={ id: Date.now(), colabId, inicio, fim, dias, ano, obs };
+  ferias.push(novasFerias);
+  sb.from('ferias').insert(novasFerias).then(({error})=>dbErr(error,'addFerias'));
   closeModal('modal-ferias');
   document.getElementById('fer-inicio').value = '';
   document.getElementById('fer-fim').value = '';
@@ -797,7 +894,8 @@ function addFerias() {
 function deleteFerias(id) {
   if (!confirm('Apagar este registo de férias?')) return;
   ferias = ferias.filter(f => f.id !== id);
-  saveFerias(); renderFerias(); renderCalendarioFerias();
+  sb.from('ferias').delete().eq('id',id).then(({error})=>dbErr(error,'deleteFerias'));
+  renderFerias(); renderCalendarioFerias();
   showToast('Férias apagadas.', 'success');
 }
 
@@ -908,16 +1006,17 @@ function renderFerias() {
 function deleteAlocacao(id){
   if(!confirm('Apagar esta alocação?'))return;
   alocacoes=alocacoes.filter(a=>a.id!==id);
-  saveAloc();renderObras();renderDashboard();renderHistorico();renderLog();
+  sb.from('alocacoes').delete().eq('id',id).then(({error})=>dbErr(error,'deleteAlocacao'));
+  renderObras();renderDashboard();renderHistorico();renderLog();
   showToast('Alocação apagada.','success');
 }
 
 // ════ VALIDAÇÃO MENSAL ════
-let validacoes = JSON.parse(localStorage.getItem('hc_validacoes') || '{}');
+let validacoes = {};
 // estrutura: { "Março_2026": { "IA": { faltas:true, sabados:false, ... }, ... } }
 let currentMonthVal = new Date().getMonth();
 
-function saveValidacoes(){ localStorage.setItem('hc_validacoes', JSON.stringify(validacoes)); }
+function saveValidacoes(){ sb.from('settings').upsert({key:'validacoes',value:validacoes}).then(({error})=>dbErr(error,'saveValidacoes')); }
 
 function chaveVal(mes, ano){ return `${MESES[mes]}_${ano}`; }
 
@@ -1076,7 +1175,7 @@ function exportarDados(){
 function importarDados(input){
   const file=input.files[0];if(!file)return;
   const reader=new FileReader();
-  reader.onload=e=>{
+  reader.onload=async e=>{
     try{
       const dados=JSON.parse(e.target.result);
       if(!dados.colaboradores||!dados.registos){showToast('Ficheiro inválido.','error');return;}
@@ -1087,7 +1186,11 @@ function importarDados(input){
       faturas=dados.faturas||[];
       alocacoes=dados.alocacoes||[];
       ferias=dados.ferias||[];
-      saveCols();saveRegs();saveObras();saveFaturas();saveAloc();saveFerias();
+      showToast('A importar para Supabase…','success');
+      await Promise.all([saveCols(),saveObras(),saveFaturas(),saveAloc(),saveFerias()]);
+      // registos: apaga todos e reinserere
+      await sb.from('registos').delete().gte('id',0);
+      if(registos.length) await sb.from('registos').insert(registos);
       populateAllSelects();renderDashboard();renderLog();
       showToast('Dados importados com sucesso!','success');
     }catch(err){showToast('Erro ao importar: '+err.message,'error');}
