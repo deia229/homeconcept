@@ -2,8 +2,30 @@
 <html lang="pt">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>HomeConcept · Gestão RH & Obras</title>
+
+<!-- PWA -->
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#BE1E8C">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="HomeConcept">
+
+<!-- Apple PWA -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="HomeConcept">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)" href="/icons/splash-1125x2436.png">
+<link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3)" href="/icons/splash-1242x2688.png">
+<link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2)" href="/icons/splash-828x1792.png">
+<link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)" href="/icons/splash-750x1334.png">
+<link rel="apple-touch-startup-image" media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2)" href="/icons/splash-1536x2048.png">
+<link rel="apple-touch-startup-image" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2)" href="/icons/splash-2048x2732.png">
+
+<!-- Favicon -->
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
+
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 <style>
@@ -526,7 +548,30 @@
   <div class="lo-sub">A carregar dados…</div>
 </div>
 
+<div id="offline-banner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9998;background:#c0392b;color:#fff;text-align:center;padding:8px 16px;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif">
+  📶 Sem ligação — a mostrar dados em cache
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/app.js"></script>
+<script>
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('/sw.js').then(reg=>{
+    reg.addEventListener('updatefound',()=>{
+      const newSW=reg.installing;
+      newSW.addEventListener('statechange',()=>{
+        if(newSW.state==='installed'&&navigator.serviceWorker.controller){
+          // Nova versão disponível — aplica automaticamente
+          newSW.postMessage('skipWaiting');
+          location.reload();
+        }
+      });
+    });
+  }).catch(err=>console.warn('SW:',err));
+}
+window.addEventListener('online', ()=>{ document.getElementById('offline-banner').style.display='none'; });
+window.addEventListener('offline',()=>{ document.getElementById('offline-banner').style.display='block'; });
+if(!navigator.onLine) document.getElementById('offline-banner').style.display='block';
+</script>
 </body>
 </html>
