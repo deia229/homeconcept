@@ -742,6 +742,9 @@ function doLogin(){
 function doLogout(){document.getElementById('login-screen').style.display='flex';document.getElementById('app').style.display='none';document.getElementById('login-pass').value='';document.getElementById('login-error').style.display='none';}
 
 async function initApp(){
+  // ── Mostrar loading ──
+  document.getElementById('loading-overlay').style.display='flex';
+
   // ── Carregar dados do Supabase ──
   try{
     const [rc,rr,ro,rf,ra,rfer,rv]=await Promise.all([
