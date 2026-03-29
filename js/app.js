@@ -156,6 +156,14 @@ function renderColaboradores(){
 }
 
 // ════ HISTÓRICO ════
+function deleteRegisto(id){
+  if(!confirm('Apagar este registo?'))return;
+  registos=registos.filter(r=>r.id!==id);
+  sb.from('registos').delete().eq('id',id).then(({error})=>dbErr(error,'deleteRegisto'));
+  renderHistorico();renderLog();renderDashboard();
+  showToast('Registo apagado.','success');
+}
+
 function renderHistorico(){
   const fc=document.getElementById('hist-filter-colab')?.value;
   const ft=document.getElementById('hist-filter-tipo')?.value;
@@ -174,19 +182,19 @@ function renderHistorico(){
   document.getElementById('hist-tbody').innerHTML='<div class="log-list">'+allItems.map(r=>{
     if(r.tipo==='falta'){
       const desc=r.modo==='hora'?`Atraso ${r.horas}h · ${r.mes}`:`Falta ${r.tipoFalta} · ${r.dias}d · ${r.mes}`;
-      return`<div class="log-item"><div class="log-dot falta"></div><div class="log-info"><div class="log-name">${cn(r.colaborador)}</div><div class="log-desc">${desc}${r.obs?' · '+r.obs:''}</div></div><div class="log-amount falta">${r.modo==='hora'?'-'+r.horas+'h':'-'+r.dias+'d'}</div><div class="log-date">${fd(r.data)}</div></div>`;
+      return`<div class="log-item"><div class="log-dot falta"></div><div class="log-info"><div class="log-name">${cn(r.colaborador)}</div><div class="log-desc">${desc}${r.obs?' · '+r.obs:''}</div></div><div class="log-amount falta">${r.modo==='hora'?'-'+r.horas+'h':'-'+r.dias+'d'}</div><div class="log-date">${fd(r.data)}</div><button class="btn btn-sm btn-danger" style="margin-left:10px" onclick="deleteRegisto(${r.id})">×</button></div>`;
     }else if(r.tipo==='sabado'){
-      return`<div class="log-item"><div class="log-dot sabado"></div><div class="log-info"><div class="log-name">${cn(r.colaborador)}</div><div class="log-desc">Sábados · ${r.numSabados}× · ${r.mes}</div></div><div class="log-amount sabado">+${fmt(r.totalValor)}</div><div class="log-date">${fd(r.data)}</div></div>`;
+      return`<div class="log-item"><div class="log-dot sabado"></div><div class="log-info"><div class="log-name">${cn(r.colaborador)}</div><div class="log-desc">Sábados · ${r.numSabados}× · ${r.mes}</div></div><div class="log-amount sabado">+${fmt(r.totalValor)}</div><div class="log-date">${fd(r.data)}</div><button class="btn btn-sm btn-danger" style="margin-left:10px" onclick="deleteRegisto(${r.id})">×</button></div>`;
     }else if(r.tipo==='adiantamento'){
-      return`<div class="log-item"><div class="log-dot adiantamento"></div><div class="log-info"><div class="log-name">${cn(r.colaborador)}</div><div class="log-desc">Adiantamento · ${r.mes}${r.obs?' · '+r.obs:''}</div></div><div class="log-amount adiantamento">${fmt(r.valor)}</div><div class="log-date">${fd(r.data)}</div></div>`;
+      return`<div class="log-item"><div class="log-dot adiantamento"></div><div class="log-info"><div class="log-name">${cn(r.colaborador)}</div><div class="log-desc">Adiantamento · ${r.mes}${r.obs?' · '+r.obs:''}</div></div><div class="log-amount adiantamento">${fmt(r.valor)}</div><div class="log-date">${fd(r.data)}</div><button class="btn btn-sm btn-danger" style="margin-left:10px" onclick="deleteRegisto(${r.id})">×</button></div>`;
     }else if(r.tipo==='alocacao'){
       const c=colaboradores.find(x=>x.id===r.colabId);
       const custoDia=c?c.valorDia:parseFloat(r.custoDia||0);
       const total=parseInt(r.dias||0)*custoDia;
       return`<div class="log-item"><div class="log-dot" style="background:var(--cyan)"></div><div class="log-info"><div class="log-name">${cn(r.colabId)}</div><div class="log-desc">Alocação → <span class="obra-badge">${on(r.obraId)}</span> · ${r.dias} dias · ${r.periodo||''}</div></div><div class="log-amount" style="color:var(--cyan)">${fmt(total)}</div><div class="log-date">${fd(r.data)}</div><button class="btn btn-sm btn-danger" style="margin-left:10px" onclick="deleteAlocacao(${r.id})">×</button></div>`;
     }
-    if(r.tipo==='diasTrabalhados'){return`<div class="log-item"><div class="log-dot" style="background:var(--orange)"></div><div class="log-info"><div class="log-name">${cn(r.colaborador)}</div><div class="log-desc">Dias trabalhados${r.descricao?' · '+r.descricao:''} · ${r.dias}d × ${fmt(r.valorDia)}/dia · ${r.mes}</div></div><div class="log-amount" style="color:var(--orange)">${fmt(r.total)}</div><div class="log-date">${fd(r.data)}</div></div>`;}
-    if(r.tipo==='horasExtras'){return`<div class="log-item"><div class="log-dot" style="background:#7c3aed"></div><div class="log-info"><div class="log-name">${cn(r.colaborador)}</div><div class="log-desc">Horas extras · ${r.tipoLabel} · ${r.horas}h · ${r.mes}</div></div><div class="log-amount" style="color:#7c3aed">+${fmt(r.total)}</div><div class="log-date">${fd(r.data)}</div></div>`;}
+    if(r.tipo==='diasTrabalhados'){return`<div class="log-item"><div class="log-dot" style="background:var(--orange)"></div><div class="log-info"><div class="log-name">${cn(r.colaborador)}</div><div class="log-desc">Dias trabalhados${r.descricao?' · '+r.descricao:''} · ${r.dias}d × ${fmt(r.valorDia)}/dia · ${r.mes}</div></div><div class="log-amount" style="color:var(--orange)">${fmt(r.total)}</div><div class="log-date">${fd(r.data)}</div><button class="btn btn-sm btn-danger" style="margin-left:10px" onclick="deleteRegisto(${r.id})">×</button></div>`;}
+    if(r.tipo==='horasExtras'){return`<div class="log-item"><div class="log-dot" style="background:#7c3aed"></div><div class="log-info"><div class="log-name">${cn(r.colaborador)}</div><div class="log-desc">Horas extras · ${r.tipoLabel} · ${r.horas}h · ${r.mes}</div></div><div class="log-amount" style="color:#7c3aed">+${fmt(r.total)}</div><div class="log-date">${fd(r.data)}</div><button class="btn btn-sm btn-danger" style="margin-left:10px" onclick="deleteRegisto(${r.id})">×</button></div>`;}
     return'';
   }).join('')+'</div>';
 }
