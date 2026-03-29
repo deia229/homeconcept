@@ -1,7 +1,7 @@
 // ══════════════════════════════════════════
 // HomeConcept · Service Worker
 // ══════════════════════════════════════════
-const CACHE = 'hc-v1';
+const CACHE = 'hc-v2';
 const STATIC = [
   '/',
   '/index.html',
