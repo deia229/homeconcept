@@ -89,10 +89,10 @@ function renderDashboard(){
     const fc=d.totalFaltasDias===0?'none':d.totalFaltasDias<=2?'few':'many';
     const arch=c.archived?'<span class="archived-badge">Arquivado</span>':'';
     const fd2=d.totalFaltasDias>0?d.totalFaltasDias.toFixed(2).replace(/\.?0+$/,'')+(d.totalHoras>0?' ('+d.totalHoras+'h)':''):'0';
-    rows+=`<tr${c.archived?' style="opacity:.55"':''}><td><span class="code-badge">${c.id}</span></td><td class="name-cell">${c.nome}${arch}</td><td class="amount">${fmt(c.salario)}</td><td class="amount" style="color:var(--purple)">${d.totalSab>0?fmt(d.totalSab):'—'}</td><td class="amount" style="color:#7c3aed">${d.totalExtras>0?fmt(d.totalExtras):'—'}</td><td class="amount" style="color:var(--orange)">${d.totalAdiant>0?fmt(d.totalAdiant):'—'}</td><td><span class="faltas-badge ${fc}">${fd2}</span></td><td class="amount neg">${d.descFaltas>0?'-'+fmt(d.descFaltas):'—'}</td><td class="amount">${d.ss_emp>0?fmt(d.ss_emp):'—'}</td><td class="amount pos" style="font-weight:700">${fmt(Math.max(0,d.liquido))}</td></tr>`;
+    rows+=`<tr${c.archived?' style="opacity:.55"':''}><td><span class="code-badge">${c.id}</span></td><td class="name-cell">${c.nome}${arch}</td><td class="amount">${fmt(c.salario)}</td><td class="amount" style="color:var(--mid)">${c.duodecimos>0?fmt(c.duodecimos):'—'}</td><td class="amount" style="color:var(--purple)">${d.totalSab>0?fmt(d.totalSab):'—'}</td><td class="amount" style="color:#7c3aed">${d.totalExtras>0?fmt(d.totalExtras):'—'}</td><td class="amount" style="color:var(--orange)">${d.totalAdiant>0?fmt(d.totalAdiant):'—'}</td><td><span class="faltas-badge ${fc}">${fd2}</span></td><td class="amount neg">${d.descFaltas>0?'-'+fmt(d.descFaltas):'—'}</td><td class="amount">${d.ss_emp>0?fmt(d.ss_emp):'—'}</td><td class="amount pos" style="font-weight:700">${fmt(Math.max(0,d.liquido))}</td></tr>`;
   });
-  document.getElementById('dash-tbody').innerHTML=rows||'<tr><td colspan="10" class="empty-state" style="padding:24px">Sem colaboradores</td></tr>';
-  document.getElementById('dash-tfoot').innerHTML=`<tr class="tfoot-row"><td colspan="2">TOTAIS</td><td>${fmt(sB)}</td><td colspan="5"></td><td></td><td>${fmt(sL)}</td></tr>`;
+  document.getElementById('dash-tbody').innerHTML=rows||'<tr><td colspan="11" class="empty-state" style="padding:24px">Sem colaboradores</td></tr>';
+  document.getElementById('dash-tfoot').innerHTML=`<tr class="tfoot-row"><td colspan="2">TOTAIS</td><td>${fmt(sB)}</td><td colspan="6"></td><td></td><td>${fmt(sL)}</td></tr>`;
   document.getElementById('stat-bruto').textContent=fmt(sB);
   document.getElementById('stat-liquido').textContent=fmt(sL);
 
