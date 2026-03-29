@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl:*)",
+      "Bash(node --check /Users/AndreiaAlmeidaRamalheiro/Desktop/homeconcept/js/app.js)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git remote:*)",
+      "Bash(git push:*)",
+      "Bash(python3 -m json.tool)",
+      "Bash(python3 -c \"from PIL import Image, ImageDraw, ImageFont; print\\(''PIL ok''\\)\")",
+      "Bash(node -e \"require\\(''canvas''\\); console.log\\(''canvas ok''\\)\")",
+      "Bash(pip3 install:*)",
+      "Bash(python3 -c \"from PIL import Image; print\\(''ok''\\)\")"
+    ]
+  }
+}
