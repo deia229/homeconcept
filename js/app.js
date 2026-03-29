@@ -1080,7 +1080,34 @@ function renderValidacao(){
   const cols = colaboradores.filter(c => !c.archived);
   let nFechados=0, nAbertos=0, nSemReg=0;
 
-  lista.innerHTML = cols.map(c => {
+  // pré-contar sem-registo para o resumo
+  cols.forEach(c => {
+    const v = getValColab(mes, new Date().getFullYear(), c.id);
+    const temQ = registos.some(r => r.colaborador===c.id && r.mes===ms && ['falta','sabado','adiantamento','horasExtras','diasTrabalhados'].includes(r.tipo));
+    if(v.fechado) nFechados++;
+    else if(!temQ) nSemReg++;
+    else nAbertos++;
+  });
+
+  // mostrar apenas quem tem registos ou está fechado
+  const colsVisiveis = cols.filter(c => {
+    const v = getValColab(mes, new Date().getFullYear(), c.id);
+    const temQ = registos.some(r => r.colaborador===c.id && r.mes===ms && ['falta','sabado','adiantamento','horasExtras','diasTrabalhados'].includes(r.tipo));
+    return temQ || v.fechado;
+  });
+
+  if(!colsVisiveis.length){
+    lista.innerHTML='<div class="empty-state" style="padding:40px"><p>Nenhum registo para validar este mês.</p></div>';
+    document.getElementById('val-pct').textContent = '—';
+    document.getElementById('val-progress-fill').style.width = '0%';
+    document.getElementById('val-n-fechados').textContent = nFechados;
+    document.getElementById('val-n-abertos').textContent = nAbertos;
+    document.getElementById('val-n-semreg').textContent = nSemReg;
+    document.getElementById('val-resumo').textContent = 'Sem ocorrências este mês';
+    return;
+  }
+
+  lista.innerHTML = colsVisiveis.map(c => {
     const d = calcCol(c, mes+1);
     const v = getValColab(mes, ano, c.id);
 
@@ -1104,9 +1131,7 @@ function renderValidacao(){
     const totalChecks = checksRelevantes.length;
     const doneChecks = checksRelevantes.filter(ch => v[ch.key]).length;
 
-    if(v.fechado) nFechados++;
-    else if(!temQualquer) nSemReg++;
-    else nAbertos++;
+
 
     const statusLabel = v.fechado ? 'fechado' : !temQualquer ? 'semregisto' : 'aberto';
     const statusText = v.fechado ? '✓ Fechado' : !temQualquer ? 'Sem registos' : 'Em aberto';
@@ -1153,15 +1178,15 @@ function renderValidacao(){
     </div>`;
   }).join('');
 
-  // update progress
-  const total = cols.length;
-  const pct = total ? Math.round((nFechados/total)*100) : 0;
+  // update progress (total = quem tem registos + fechados)
+  const totalRelevante = nFechados + nAbertos;
+  const pct = totalRelevante ? Math.round((nFechados/totalRelevante)*100) : 0;
   document.getElementById('val-pct').textContent = pct + '%';
   document.getElementById('val-progress-fill').style.width = pct + '%';
   document.getElementById('val-n-fechados').textContent = nFechados;
   document.getElementById('val-n-abertos').textContent = nAbertos;
   document.getElementById('val-n-semreg').textContent = nSemReg;
-  document.getElementById('val-resumo').textContent = nFechados === total ? '✅ Todos fechados — pode processar!' : `${nFechados} de ${total} fechados`;
+  document.getElementById('val-resumo').textContent = totalRelevante && nFechados === totalRelevante ? '✅ Todos fechados — pode processar!' : `${nFechados} de ${totalRelevante} fechados`;
 }
 
 function toggleValCard(colabId){
