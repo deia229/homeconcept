@@ -626,34 +626,45 @@ function exportPagamentosExcel(){
   const mes=currentMonth.folha;
   const nomeMes=MESES[mes-1];
   const cols=colaboradores.filter(c=>!c.archived);
-  const getNome=id=>{const c=colaboradores.find(x=>x.id===id);return c?c.nome:String(id||'—');};
-  // Escape XML special chars
-  const xe=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  // String cell
-  const sc=(val,sid)=>`<Cell ss:StyleID="${sid}"><Data ss:Type="String">${xe(val)}</Data></Cell>`;
-  // Number cell — avoids scientific notation
-  const nc=(val,sid)=>{const n=+val||0;return`<Cell ss:StyleID="${sid}"><Data ss:Type="Number">${n.toFixed(6)}</Data></Cell>`;};
+  const e=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const fE=n=>n.toLocaleString('pt-PT',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
+  const fN=n=>n.toLocaleString('pt-PT',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const TH='padding:9px 11px;border:1px solid #333;font-size:10px;font-weight:700;color:#fff;background:#1A1A1A;white-space:nowrap;text-align:';
+  const TD='padding:7px 11px;border:1px solid #e0e0e0;font-size:11px;';
+  const MN='font-family:Courier New,monospace;text-align:right;';
 
-  // ── Folha 1: Pagamentos ──
+  // ── Tabela 1: Pagamentos ──
   let tSal=0,tDuod=0,tSab=0,tBruto=0,tAdiant=0,tFaltas=0,tDesc=0,tSS=0,tLiq=0,tTransf=0;
-  let sheet1Rows='';
-  cols.forEach(c=>{
+  let rows1='';
+  cols.forEach((c,i)=>{
     const d=calcCol(c,mes);
     const liq=Math.max(0,d.bruto-d.descFaltas-d.ss_emp);
     const transf=Math.max(0,liq-d.totalAdiant);
     tSal+=c.salario;tDuod+=c.duodecimos;tSab+=d.totalSab;tBruto+=d.bruto;
-    tAdiant+=d.totalAdiant;tFaltas+=d.totalFaltasDias;tDesc+=d.descFaltas;
-    tSS+=d.ss_emp;tLiq+=liq;tTransf+=transf;
-    sheet1Rows+=`<Row ss:Height="22">${sc(c.nome,'sName')}${nc(c.salario,'sMoney')}${nc(c.duodecimos,'sMoney')}${nc(d.totalSab,'sMoney')}${nc(d.bruto,'sBruto')}${nc(d.totalAdiant,'sAdiant')}${nc(d.totalFaltasDias,'sDias')}${nc(d.descFaltas,'sMoney')}${nc(d.ss_emp,'sMoney')}${nc(liq,'sLiq')}${nc(transf,'sTransf')}</Row>\n`;
+    tAdiant+=d.totalAdiant;tFaltas+=d.totalFaltasDias;tDesc+=d.descFaltas;tSS+=d.ss_emp;tLiq+=liq;tTransf+=transf;
+    const bg=i%2===0?'#fff':'#fafafa';
+    rows1+=`<tr style="background:${bg}">
+      <td style="${TD}text-align:left">${e(c.nome)}</td>
+      <td style="${TD}${MN}">${fE(c.salario)}</td>
+      <td style="${TD}${MN}">${fE(c.duodecimos)}</td>
+      <td style="${TD}${MN}">${d.totalSab>0?fE(d.totalSab):'—'}</td>
+      <td style="${TD}${MN}font-weight:700">${fE(d.bruto)}</td>
+      <td style="${TD}${MN}color:#C0392B">${d.totalAdiant>0?fE(d.totalAdiant):'—'}</td>
+      <td style="${TD}${MN}">${d.totalFaltasDias>0?fN(d.totalFaltasDias):'—'}</td>
+      <td style="${TD}${MN}">${d.descFaltas>0?fE(d.descFaltas):'—'}</td>
+      <td style="${TD}${MN}">${d.ss_emp>0?fE(d.ss_emp):'—'}</td>
+      <td style="${TD}${MN}font-weight:700">${fE(liq)}</td>
+      <td style="${TD}${MN}font-weight:700;color:#1A7A4A">${fE(transf)}</td>
+    </tr>`;
   });
 
-  // ── Folha 2: Ocorrências ──
+  // ── Tabela 2: Ocorrências ──
   const ms=nomeMes;
   const ocorr=registos.filter(r=>r.mes===ms).sort((a,b)=>(a.data||'').localeCompare(b.data||''));
-  let sheet2Rows='';
-  ocorr.forEach(r=>{
+  let rows2='';
+  ocorr.forEach((r,i)=>{
     const colab=colaboradores.find(x=>x.id===r.colaborador);
-    const nomeC=colab?colab.nome:getNome(r.colaborador);
+    const nomeC=colab?colab.nome:String(r.colaborador||'—');
     const base=colab?(colab.salario+colab.duodecimos)/21:0;
     let tipo='',detalhe='',valor=0;
     if(r.tipo==='falta'){
@@ -671,58 +682,68 @@ function exportPagamentosExcel(){
       tipo='Dias Trabalhados';detalhe=`${r.dias} dias${r.descricao?' · '+r.descricao:''}`;valor=parseFloat(r.total||0);
     }else{return;}
     const dataStr=r.data?new Date(r.data).toLocaleDateString('pt-PT'):(r.mes||'—');
-    sheet2Rows+=`<Row ss:Height="20">${sc(dataStr,'oDate')}${sc(nomeC,'oName')}${sc(tipo,'oTipo')}${sc(detalhe,'oDetail')}${nc(valor,'oValor')}</Row>\n`;
+    const vc=valor<0?'color:#C0392B':'color:#1A7A4A';
+    rows2+=`<tr style="background:${i%2===0?'#fff':'#fafafa'}">
+      <td style="${TD}text-align:center">${e(dataStr)}</td>
+      <td style="${TD}font-weight:700">${e(nomeC)}</td>
+      <td style="${TD}text-align:center">${e(tipo)}</td>
+      <td style="${TD}">${e(detalhe)}</td>
+      <td style="${TD}${MN}${vc}">${(valor>=0?'+':'')+fE(valor)}</td>
+    </tr>`;
   });
 
-  const xml=`<?xml version="1.0" encoding="UTF-8"?>
-<?mso-application progid="Excel.Sheet"?>
-<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
- xmlns:o="urn:schemas-microsoft-com:office:office"
- xmlns:x="urn:schemas-microsoft-com:office:excel"
- xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
-<Styles>
- <Style ss:ID="sTitle"><Alignment ss:Horizontal="Left" ss:Vertical="Center"/><Font ss:Bold="1" ss:Color="#FFFFFF" ss:Size="14" ss:Name="Arial"/><Interior ss:Color="#BE1E8C" ss:Pattern="Solid"/></Style>
- <Style ss:ID="sHeader"><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/><Font ss:Bold="1" ss:Color="#FFFFFF" ss:Size="10" ss:Name="Arial"/><Interior ss:Color="#1A1A1A" ss:Pattern="Solid"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="2" ss:Color="#BE1E8C"/></Borders></Style>
- <Style ss:ID="sName"><Alignment ss:Horizontal="Left" ss:Vertical="Center"/><Font ss:Size="11" ss:Name="Arial"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E0E0E0"/></Borders></Style>
- <Style ss:ID="sMoney"><Alignment ss:Horizontal="Right" ss:Vertical="Center"/><Font ss:Size="11" ss:Name="Courier New"/><NumberFormat ss:Format="#,##0.00 &quot;€&quot;"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E0E0E0"/></Borders></Style>
- <Style ss:ID="sBruto"><Alignment ss:Horizontal="Right" ss:Vertical="Center"/><Font ss:Bold="1" ss:Size="11" ss:Name="Courier New"/><NumberFormat ss:Format="#,##0.00 &quot;€&quot;"/><Interior ss:Color="#FFF8FD" ss:Pattern="Solid"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E0E0E0"/></Borders></Style>
- <Style ss:ID="sAdiant"><Alignment ss:Horizontal="Right" ss:Vertical="Center"/><Font ss:Color="#C0392B" ss:Size="11" ss:Name="Courier New"/><NumberFormat ss:Format="#,##0.00 &quot;€&quot;"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E0E0E0"/></Borders></Style>
- <Style ss:ID="sDias"><Alignment ss:Horizontal="Right" ss:Vertical="Center"/><Font ss:Size="11" ss:Name="Courier New"/><NumberFormat ss:Format="#,##0.00"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E0E0E0"/></Borders></Style>
- <Style ss:ID="sLiq"><Alignment ss:Horizontal="Right" ss:Vertical="Center"/><Font ss:Bold="1" ss:Size="11" ss:Name="Courier New"/><NumberFormat ss:Format="#,##0.00 &quot;€&quot;"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E0E0E0"/></Borders></Style>
- <Style ss:ID="sTransf"><Alignment ss:Horizontal="Right" ss:Vertical="Center"/><Font ss:Bold="1" ss:Color="#1A7A4A" ss:Size="11" ss:Name="Courier New"/><NumberFormat ss:Format="#,##0.00 &quot;€&quot;"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E0E0E0"/></Borders></Style>
- <Style ss:ID="sTotLabel"><Alignment ss:Horizontal="Left" ss:Vertical="Center"/><Font ss:Bold="1" ss:Size="12" ss:Name="Arial"/><Interior ss:Color="#F5F5F5" ss:Pattern="Solid"/><Borders><Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="2" ss:Color="#BE1E8C"/></Borders></Style>
- <Style ss:ID="sTotMoney"><Alignment ss:Horizontal="Right" ss:Vertical="Center"/><Font ss:Bold="1" ss:Size="12" ss:Name="Courier New"/><Interior ss:Color="#F5F5F5" ss:Pattern="Solid"/><NumberFormat ss:Format="#,##0.00 &quot;€&quot;"/><Borders><Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="2" ss:Color="#BE1E8C"/></Borders></Style>
- <Style ss:ID="sTotDias"><Alignment ss:Horizontal="Right" ss:Vertical="Center"/><Font ss:Bold="1" ss:Size="12" ss:Name="Courier New"/><Interior ss:Color="#F5F5F5" ss:Pattern="Solid"/><NumberFormat ss:Format="#,##0.00"/><Borders><Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="2" ss:Color="#BE1E8C"/></Borders></Style>
- <Style ss:ID="sTotTransf"><Alignment ss:Horizontal="Right" ss:Vertical="Center"/><Font ss:Bold="1" ss:Color="#1A7A4A" ss:Size="13" ss:Name="Courier New"/><Interior ss:Color="#F5F5F5" ss:Pattern="Solid"/><NumberFormat ss:Format="#,##0.00 &quot;€&quot;"/><Borders><Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="2" ss:Color="#BE1E8C"/></Borders></Style>
- <Style ss:ID="sFooter"><Alignment ss:Horizontal="Left" ss:Vertical="Center"/><Font ss:Italic="1" ss:Color="#999999" ss:Size="9" ss:Name="Arial"/></Style>
- <Style ss:ID="oTitle"><Alignment ss:Horizontal="Left" ss:Vertical="Center"/><Font ss:Bold="1" ss:Color="#FFFFFF" ss:Size="12" ss:Name="Arial"/><Interior ss:Color="#BE1E8C" ss:Pattern="Solid"/></Style>
- <Style ss:ID="oHeader"><Alignment ss:Horizontal="Center" ss:Vertical="Center"/><Font ss:Bold="1" ss:Color="#FFFFFF" ss:Size="10" ss:Name="Arial"/><Interior ss:Color="#1A1A1A" ss:Pattern="Solid"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="2" ss:Color="#BE1E8C"/></Borders></Style>
- <Style ss:ID="oDate"><Alignment ss:Horizontal="Center" ss:Vertical="Center"/><Font ss:Size="10" ss:Name="Arial"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E0E0E0"/></Borders></Style>
- <Style ss:ID="oName"><Alignment ss:Horizontal="Left" ss:Vertical="Center"/><Font ss:Bold="1" ss:Size="10" ss:Name="Arial"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E0E0E0"/></Borders></Style>
- <Style ss:ID="oTipo"><Alignment ss:Horizontal="Center" ss:Vertical="Center"/><Font ss:Size="10" ss:Name="Arial"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E0E0E0"/></Borders></Style>
- <Style ss:ID="oDetail"><Alignment ss:Horizontal="Left" ss:Vertical="Center"/><Font ss:Size="10" ss:Name="Arial"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E0E0E0"/></Borders></Style>
- <Style ss:ID="oValor"><Alignment ss:Horizontal="Right" ss:Vertical="Center"/><Font ss:Size="10" ss:Name="Courier New"/><NumberFormat ss:Format="#,##0.00 &quot;€&quot;"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E0E0E0"/></Borders></Style>
-</Styles>
-<Worksheet ss:Name="Pagamentos ${nomeMes}">
- <Table ss:DefaultRowHeight="18">
-  <Column ss:Width="190"/><Column ss:Width="95"/><Column ss:Width="90"/><Column ss:Width="80"/><Column ss:Width="95"/><Column ss:Width="95"/><Column ss:Width="80"/><Column ss:Width="90"/><Column ss:Width="80"/><Column ss:Width="95"/><Column ss:Width="95"/>
-  <Row ss:Height="32"><Cell ss:StyleID="sTitle" ss:MergeAcross="10"><Data ss:Type="String">HomeConcept — Pagamentos de Salários · ${nomeMes} 2026</Data></Cell></Row>
-  <Row ss:Height="38">${sc('NOME','sHeader')}${sc('SALÁRIO BASE','sHeader')}${sc('DUODÉCIMOS','sHeader')}${sc('SÁBADOS','sHeader')}${sc('TOTAL BRUTO','sHeader')}${sc('ADIANTAMENTOS','sHeader')}${sc('FALTAS (dias)','sHeader')}${sc('DESC. FALTAS','sHeader')}${sc('SS (11%)','sHeader')}${sc('LÍQUIDO','sHeader')}${sc('A TRANSFERIR','sHeader')}</Row>
-  ${sheet1Rows}  <Row ss:Height="28">${sc('TOTAIS','sTotLabel')}${nc(tSal,'sTotMoney')}${nc(tDuod,'sTotMoney')}${nc(tSab,'sTotMoney')}${nc(tBruto,'sTotMoney')}${nc(tAdiant,'sTotMoney')}${nc(tFaltas,'sTotDias')}${nc(tDesc,'sTotMoney')}${nc(tSS,'sTotMoney')}${nc(tLiq,'sTotMoney')}${nc(tTransf,'sTotTransf')}</Row>
-  <Row ss:Height="20"><Cell ss:StyleID="sFooter" ss:MergeAcross="10"><Data ss:Type="String">Exportado em ${new Date().toLocaleDateString('pt-PT')} · HomeConcept - Design &amp; Construção</Data></Cell></Row>
- </Table>
- <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel"><FreezePanes/><FrozenNoSplit/><SplitHorizontal>2</SplitHorizontal><TopRowBottomPane>2</TopRowBottomPane><ActivePane>2</ActivePane></WorksheetOptions>
-</Worksheet>
-<Worksheet ss:Name="Ocorrências">
- <Table ss:DefaultRowHeight="18">
-  <Column ss:Width="85"/><Column ss:Width="175"/><Column ss:Width="115"/><Column ss:Width="250"/><Column ss:Width="95"/>
-  <Row ss:Height="28"><Cell ss:StyleID="oTitle" ss:MergeAcross="4"><Data ss:Type="String">Ocorrências do Mês — ${nomeMes} 2026</Data></Cell></Row>
-  <Row ss:Height="28">${sc('DATA','oHeader')}${sc('COLABORADOR','oHeader')}${sc('TIPO','oHeader')}${sc('DETALHE','oHeader')}${sc('VALOR / IMPACTO','oHeader')}</Row>
-  ${sheet2Rows}</Table>
-</Worksheet>
-</Workbook>`;
+  const html=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+<head><meta charset="UTF-8">
+<!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets>
+<x:ExcelWorksheet><x:Name>Pagamentos ${nomeMes}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet>
+<x:ExcelWorksheet><x:Name>Ocorrências</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet>
+</x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->
+</head><body>
+<table style="border-collapse:collapse;font-family:Arial,sans-serif;margin-bottom:24px">
+  <tr><td colspan="11" style="padding:13px 15px;background:#BE1E8C;color:#fff;font-size:15px;font-weight:700;letter-spacing:.5px">HomeConcept — Pagamentos de Salários · ${nomeMes} 2026</td></tr>
+  <tr>
+    <th style="${TH}left;min-width:180px">NOME</th>
+    <th style="${TH}right;min-width:90px">SALÁRIO BASE</th>
+    <th style="${TH}right;min-width:85px">DUODÉCIMOS</th>
+    <th style="${TH}right;min-width:75px">SÁBADOS</th>
+    <th style="${TH}right;min-width:90px">TOTAL BRUTO</th>
+    <th style="${TH}right;min-width:90px">ADIANTAMENTOS</th>
+    <th style="${TH}right;min-width:75px">FALTAS (dias)</th>
+    <th style="${TH}right;min-width:85px">DESC. FALTAS</th>
+    <th style="${TH}right;min-width:75px">SS (11%)</th>
+    <th style="${TH}right;min-width:90px">LÍQUIDO</th>
+    <th style="${TH}right;min-width:90px">A TRANSFERIR</th>
+  </tr>
+  ${rows1}
+  <tr style="background:#f5f5f5;border-top:2px solid #BE1E8C">
+    <td style="${TD}font-weight:700;font-size:12px">TOTAIS</td>
+    <td style="${TD}${MN}font-weight:700">${fE(tSal)}</td>
+    <td style="${TD}${MN}font-weight:700">${fE(tDuod)}</td>
+    <td style="${TD}${MN}font-weight:700">${fE(tSab)}</td>
+    <td style="${TD}${MN}font-weight:700">${fE(tBruto)}</td>
+    <td style="${TD}${MN}font-weight:700;color:#C0392B">${fE(tAdiant)}</td>
+    <td style="${TD}${MN}font-weight:700">${fN(tFaltas)}</td>
+    <td style="${TD}${MN}font-weight:700">${fE(tDesc)}</td>
+    <td style="${TD}${MN}font-weight:700">${fE(tSS)}</td>
+    <td style="${TD}${MN}font-weight:700">${fE(tLiq)}</td>
+    <td style="${TD}${MN}font-weight:700;color:#1A7A4A;font-size:13px">${fE(tTransf)}</td>
+  </tr>
+  <tr><td colspan="11" style="padding:7px 11px;font-size:10px;color:#999">Exportado em ${new Date().toLocaleDateString('pt-PT')} · HomeConcept - Design &amp; Construção</td></tr>
+</table>
+<table style="border-collapse:collapse;font-family:Arial,sans-serif">
+  <tr><td colspan="5" style="padding:11px 13px;background:#BE1E8C;color:#fff;font-size:13px;font-weight:700">Ocorrências do Mês — ${nomeMes} 2026</td></tr>
+  <tr>
+    <th style="${TH}center;min-width:80px">DATA</th>
+    <th style="${TH}left;min-width:160px">COLABORADOR</th>
+    <th style="${TH}center;min-width:105px">TIPO</th>
+    <th style="${TH}left;min-width:230px">DETALHE</th>
+    <th style="${TH}right;min-width:90px">VALOR / IMPACTO</th>
+  </tr>
+  ${rows2||`<tr><td colspan="5" style="${TD}color:#999;text-align:center">Sem ocorrências neste mês</td></tr>`}
+</table>
+</body></html>`;
 
-  const blob=new Blob([xml],{type:'application/vnd.ms-excel;charset=utf-8'});
+  const blob=new Blob(['\ufeff'+html],{type:'application/vnd.ms-excel;charset=utf-8'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
   a.href=url;
