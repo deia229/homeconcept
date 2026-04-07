@@ -113,6 +113,7 @@
       <div class="stats-grid">
         <div class="stat-card"><div class="stat-label">Total Bruto RH</div><div class="stat-value pink" id="stat-bruto">—</div><div class="stat-meta">mês selecionado</div></div>
         <div class="stat-card"><div class="stat-label">Líquido a Pagar</div><div class="stat-value green" id="stat-liquido">—</div><div class="stat-meta">após descontos</div></div>
+        <div class="stat-card"><div class="stat-label">Horas Extras</div><div class="stat-value" style="color:#7c3aed" id="stat-extras-val">—</div><div class="stat-meta" id="stat-extras-h">sem registos</div></div>
         <div class="stat-card"><div class="stat-label">Faturas Obras</div><div class="stat-value cyan" id="stat-faturas-total">—</div><div class="stat-meta">total materiais</div></div>
         <div class="stat-card"><div class="stat-label">Obras Ativas</div><div class="stat-value orange" id="stat-obras-ativas">—</div><div class="stat-meta">em curso</div></div>
       </div>
@@ -158,7 +159,7 @@
           <label class="toggle-wrap"><label class="toggle-switch"><input type="checkbox" id="folha-show-archived" onchange="renderFolha()"><span class="toggle-slider"></span></label>Mostrar arquivados</label>
         </div>
         <table>
-          <thead><tr><th>Cód.</th><th>Nome</th><th>Função</th><th>Vencimento</th><th>Duodécimos</th><th>Sábados</th><th>Total Bruto</th><th>Adiant.</th><th>Faltas</th><th>Desc. Faltas</th><th>SS (11%)</th><th>Líquido</th></tr></thead>
+          <thead><tr><th>Cód.</th><th>Nome</th><th>Vencimento</th><th>Duodécimos</th><th>Sábados</th><th>Total Bruto</th><th>Adiant.</th><th>Faltas</th><th>Desc. Faltas</th><th>SS (11%)</th><th>Líquido</th></tr></thead>
           <tbody id="folha-tbody"></tbody><tfoot id="folha-tfoot"></tfoot>
         </table>
       </div>

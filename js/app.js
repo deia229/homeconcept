@@ -56,6 +56,7 @@ function calcCol(c,mes){
   // Horas extras
   const extrasR=registos.filter(r=>r.tipo==='horasExtras'&&r.colaborador===c.id&&r.mes===ms);
   const totalExtras=extrasR.reduce((s,r)=>s+parseFloat(r.total||0),0);
+  const totalExtrasHoras=extrasR.reduce((s,r)=>s+parseFloat(r.horas||0),0);
   const bruto=c.salario+c.duodecimos+totalSab+rendDias+totalExtras;
   const descFaltas=(c.salario+c.duodecimos)/21*totalFaltasDias;
   // SS sobre ordenado minimo 2026 (920) + duodecimos minimo (153.33) - desconto faltas
@@ -63,7 +64,7 @@ function calcCol(c,mes){
   const baseSS=Math.max(0,920+153.33-totalFaltasDias*valorDiarioMinimo);
   const ss_emp=c.ss?baseSS*0.11:0;
   const liquido=bruto-descFaltas-ss_emp-totalAdiant;
-  return{bruto,descFaltas,ss_emp,totalAdiant,liquido,totalFaltasDias,totalHoras,totalSab,numSab,totalDiasTrab,rendDias,totalExtras};
+  return{bruto,descFaltas,ss_emp,totalAdiant,liquido,totalFaltasDias,totalHoras,totalSab,numSab,totalDiasTrab,rendDias,totalExtras,totalExtrasHoras};
 }
 
 // ════ CÁLCULOS OBRAS ════
@@ -83,21 +84,23 @@ function renderDashboard(){
   const mes=currentMonth.dash;
   const showA=document.getElementById('dash-show-archived')?.checked;
   document.getElementById('dash-month-label').textContent=MESES[mes-1]+' 2026';
-  let sB=0,sL=0,rows='';
+  let sB=0,sL=0,sEV=0,sEH=0,rows='';
   colaboradores.filter(c=>!c.archived||showA).forEach(c=>{
-    const d=calcCol(c,mes);sB+=d.bruto;sL+=Math.max(0,d.liquido);
+    const d=calcCol(c,mes);sB+=d.bruto;sL+=Math.max(0,d.liquido);sEV+=d.totalExtras;sEH+=d.totalExtrasHoras;
     const fc=d.totalFaltasDias===0?'none':d.totalFaltasDias<=2?'few':'many';
     const arch=c.archived?'<span class="archived-badge">Arquivado</span>':'';
     const fd2=d.totalFaltasDias>0?d.totalFaltasDias.toFixed(2).replace(/\.?0+$/,'')+(d.totalHoras>0?' ('+d.totalHoras+'h)':''):'0';
     const vPago=getValColab(mes-1,new Date().getFullYear(),c.id);
     const pagoBadge=vPago.fechado?'<span class="val-status-badge fechado" style="font-size:10px;padding:2px 8px;margin-left:6px;vertical-align:middle">✓ pago</span>':'';
     const rowStyle=c.archived?'opacity:.55':vPago.fechado?'background:rgba(34,197,94,0.06)':'';
-    rows+=`<tr${rowStyle?` style="${rowStyle}"`:''}><td><span class="code-badge">${c.id}</span></td><td class="name-cell">${c.nome}${arch}${pagoBadge}</td><td class="amount">${fmt(c.salario)}</td><td class="amount" style="color:var(--mid)">${c.duodecimos>0?fmt(c.duodecimos):'—'}</td><td class="amount" style="color:var(--purple)">${d.totalSab>0?fmt(d.totalSab):'—'}</td><td class="amount" style="color:#7c3aed">${d.totalExtras>0?fmt(d.totalExtras):'—'}</td><td class="amount" style="color:var(--orange)">${d.totalAdiant>0?fmt(d.totalAdiant):'—'}</td><td><span class="faltas-badge ${fc}">${fd2}</span></td><td class="amount neg">${d.descFaltas>0?'-'+fmt(d.descFaltas):'—'}</td><td class="amount">${d.ss_emp>0?fmt(d.ss_emp):'—'}</td><td class="amount pos" style="font-weight:700">${fmt(Math.max(0,d.liquido))}</td></tr>`;
+    rows+=`<tr${rowStyle?` style="${rowStyle}"`:''}><td><span class="code-badge">${c.id}</span></td><td class="name-cell">${c.nome}${arch}${pagoBadge}</td><td class="amount">${fmt(c.salario)}</td><td class="amount" style="color:var(--mid)">${c.duodecimos>0?fmt(c.duodecimos):'—'}</td><td class="amount" style="color:var(--purple)">${d.totalSab>0?fmt(d.totalSab):'—'}</td><td class="amount" style="color:#7c3aed">${d.totalExtras>0?`<span style="font-size:10px;opacity:.75">${d.totalExtrasHoras}h</span> ${fmt(d.totalExtras)}`:'—'}</td><td class="amount" style="color:var(--orange)">${d.totalAdiant>0?fmt(d.totalAdiant):'—'}</td><td><span class="faltas-badge ${fc}">${fd2}</span></td><td class="amount neg">${d.descFaltas>0?'-'+fmt(d.descFaltas):'—'}</td><td class="amount">${d.ss_emp>0?fmt(d.ss_emp):'—'}</td><td class="amount pos" style="font-weight:700">${fmt(Math.max(0,d.liquido))}</td></tr>`;
   });
   document.getElementById('dash-tbody').innerHTML=rows||'<tr><td colspan="11" class="empty-state" style="padding:24px">Sem colaboradores</td></tr>';
   document.getElementById('dash-tfoot').innerHTML=`<tr class="tfoot-row"><td colspan="2">TOTAIS</td><td>${fmt(sB)}</td><td colspan="6"></td><td></td><td>${fmt(sL)}</td></tr>`;
   document.getElementById('stat-bruto').textContent=fmt(sB);
   document.getElementById('stat-liquido').textContent=fmt(sL);
+  document.getElementById('stat-extras-val').textContent=sEV>0?fmt(sEV):'—';
+  document.getElementById('stat-extras-h').textContent=sEH>0?sEH+'h trabalhadas':'sem registos';
 
   // obras no dashboard
   const totalFat=faturas.reduce((s,f)=>s+parseFloat(f.valor||0),0);
@@ -125,10 +128,10 @@ function renderFolha(){
     tB+=d.bruto;tL+=Math.max(0,d.liquido);tA+=d.totalAdiant;tF+=d.totalFaltasDias;tD+=d.descFaltas;tS+=d.ss_emp;
     const fStr=d.totalFaltasDias>0?(d.totalHoras>0?d.totalHoras+'h':d.totalFaltasDias.toFixed(2).replace(/\.?0+$/,'')+'d'):'—';
     const arch=c.archived?'<span class="archived-badge">Arq.</span>':'';
-    rows+=`<tr${c.archived?' style="opacity:.55"':''}><td><span class="code-badge">${c.id}</span></td><td class="name-cell" style="font-size:12.5px">${c.nome}${arch}</td><td style="color:var(--mid);font-size:12px">${c.funcao||'—'}</td><td class="amount">${fmt(c.salario)}</td><td class="amount">${c.duodecimos>0?fmt(c.duodecimos):'—'}</td><td class="amount" style="color:var(--purple)">${d.totalSab>0?fmt(d.totalSab):'—'}</td><td class="amount" style="font-weight:600">${fmt(d.bruto)}</td><td class="amount" style="color:var(--orange)">${d.totalAdiant>0?fmt(d.totalAdiant):'—'}</td><td style="text-align:center;font-family:'DM Mono',monospace;font-size:12px">${fStr}</td><td class="amount neg">${d.descFaltas>0?'-'+fmt(d.descFaltas):'—'}</td><td class="amount">${d.ss_emp>0?fmt(d.ss_emp):'—'}</td><td class="amount pos" style="font-weight:700">${fmt(Math.max(0,d.liquido))}</td></tr>`;
+    rows+=`<tr${c.archived?' style="opacity:.55"':''}><td><span class="code-badge">${c.id}</span></td><td class="name-cell" style="font-size:12.5px">${c.nome}${arch}</td><td class="amount">${fmt(c.salario)}</td><td class="amount">${c.duodecimos>0?fmt(c.duodecimos):'—'}</td><td class="amount" style="color:var(--purple)">${d.totalSab>0?fmt(d.totalSab):'—'}</td><td class="amount" style="font-weight:600">${fmt(d.bruto)}</td><td class="amount" style="color:var(--orange)">${d.totalAdiant>0?fmt(d.totalAdiant):'—'}</td><td style="text-align:center;font-family:'DM Mono',monospace;font-size:12px">${fStr}</td><td class="amount neg">${d.descFaltas>0?'-'+fmt(d.descFaltas):'—'}</td><td class="amount">${d.ss_emp>0?fmt(d.ss_emp):'—'}</td><td class="amount pos" style="font-weight:700">${fmt(Math.max(0,d.liquido))}</td></tr>`;
   });
   document.getElementById('folha-tbody').innerHTML=rows;
-  document.getElementById('folha-tfoot').innerHTML=`<tr class="tfoot-row"><td colspan="3">TOTAIS</td><td>${fmt(tB)}</td><td></td><td></td><td>${fmt(tB)}</td><td>${fmt(tA)}</td><td>${tF>0?tF.toFixed(2)+'d':'—'}</td><td>-${fmt(tD)}</td><td>${fmt(tS)}</td><td>${fmt(tL)}</td></tr>`;
+  document.getElementById('folha-tfoot').innerHTML=`<tr class="tfoot-row"><td colspan="2">TOTAIS</td><td>${fmt(tB)}</td><td></td><td></td><td>${fmt(tB)}</td><td>${fmt(tA)}</td><td>${tF>0?tF.toFixed(2)+'d':'—'}</td><td>-${fmt(tD)}</td><td>${fmt(tS)}</td><td>${fmt(tL)}</td></tr>`;
 }
 
 // ════ COLABORADORES ════
@@ -634,13 +637,13 @@ function exportPagamentosExcel(){
   const MN='font-family:Courier New,monospace;text-align:right;';
 
   // ── Tabela 1: Pagamentos ──
-  let tSal=0,tDuod=0,tSab=0,tBruto=0,tAdiant=0,tFaltas=0,tDesc=0,tSS=0,tLiq=0,tTransf=0;
+  let tSal=0,tDuod=0,tSab=0,tExtrasV=0,tExtrasH=0,tBruto=0,tAdiant=0,tFaltas=0,tDesc=0,tSS=0,tLiq=0,tTransf=0;
   let rows1='';
   cols.forEach((c,i)=>{
     const d=calcCol(c,mes);
     const liq=Math.max(0,d.bruto-d.descFaltas-d.ss_emp);
     const transf=Math.max(0,liq-d.totalAdiant);
-    tSal+=c.salario;tDuod+=c.duodecimos;tSab+=d.totalSab;tBruto+=d.bruto;
+    tSal+=c.salario;tDuod+=c.duodecimos;tSab+=d.totalSab;tExtrasV+=d.totalExtras;tExtrasH+=d.totalExtrasHoras;tBruto+=d.bruto;
     tAdiant+=d.totalAdiant;tFaltas+=d.totalFaltasDias;tDesc+=d.descFaltas;tSS+=d.ss_emp;tLiq+=liq;tTransf+=transf;
     const bg=i%2===0?'#fff':'#fafafa';
     rows1+=`<tr style="background:${bg}">
@@ -648,6 +651,7 @@ function exportPagamentosExcel(){
       <td style="${TD}${MN}">${fE(c.salario)}</td>
       <td style="${TD}${MN}">${fE(c.duodecimos)}</td>
       <td style="${TD}${MN}">${d.totalSab>0?fE(d.totalSab):'—'}</td>
+      <td style="${TD}${MN}">${d.totalExtras>0?d.totalExtrasHoras+'h · '+fE(d.totalExtras):'—'}</td>
       <td style="${TD}${MN}font-weight:700">${fE(d.bruto)}</td>
       <td style="${TD}${MN}color:#C0392B">${d.totalAdiant>0?fE(d.totalAdiant):'—'}</td>
       <td style="${TD}${MN}">${d.totalFaltasDias>0?fN(d.totalFaltasDias):'—'}</td>
@@ -700,12 +704,13 @@ function exportPagamentosExcel(){
 </x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->
 </head><body>
 <table style="border-collapse:collapse;font-family:Arial,sans-serif;margin-bottom:24px">
-  <tr><td colspan="11" style="padding:13px 15px;background:#BE1E8C;color:#fff;font-size:15px;font-weight:700;letter-spacing:.5px">HomeConcept — Pagamentos de Salários · ${nomeMes} 2026</td></tr>
+  <tr><td colspan="12" style="padding:13px 15px;background:#BE1E8C;color:#fff;font-size:15px;font-weight:700;letter-spacing:.5px">HomeConcept — Pagamentos de Salários · ${nomeMes} 2026</td></tr>
   <tr>
     <th style="${TH}left;min-width:180px">NOME</th>
     <th style="${TH}right;min-width:90px">SALÁRIO BASE</th>
     <th style="${TH}right;min-width:85px">DUODÉCIMOS</th>
     <th style="${TH}right;min-width:75px">SÁBADOS</th>
+    <th style="${TH}right;min-width:110px">HORAS EXTRAS</th>
     <th style="${TH}right;min-width:90px">TOTAL BRUTO</th>
     <th style="${TH}right;min-width:90px">ADIANTAMENTOS</th>
     <th style="${TH}right;min-width:75px">FALTAS (dias)</th>
@@ -720,6 +725,7 @@ function exportPagamentosExcel(){
     <td style="${TD}${MN}font-weight:700">${fE(tSal)}</td>
     <td style="${TD}${MN}font-weight:700">${fE(tDuod)}</td>
     <td style="${TD}${MN}font-weight:700">${fE(tSab)}</td>
+    <td style="${TD}${MN}font-weight:700">${tExtrasH>0?tExtrasH+'h · '+fE(tExtrasV):'—'}</td>
     <td style="${TD}${MN}font-weight:700">${fE(tBruto)}</td>
     <td style="${TD}${MN}font-weight:700;color:#C0392B">${fE(tAdiant)}</td>
     <td style="${TD}${MN}font-weight:700">${fN(tFaltas)}</td>
@@ -728,7 +734,7 @@ function exportPagamentosExcel(){
     <td style="${TD}${MN}font-weight:700">${fE(tLiq)}</td>
     <td style="${TD}${MN}font-weight:700;color:#1A7A4A;font-size:13px">${fE(tTransf)}</td>
   </tr>
-  <tr><td colspan="11" style="padding:7px 11px;font-size:10px;color:#999">Exportado em ${new Date().toLocaleDateString('pt-PT')} · HomeConcept - Design &amp; Construção</td></tr>
+  <tr><td colspan="12" style="padding:7px 11px;font-size:10px;color:#999">Exportado em ${new Date().toLocaleDateString('pt-PT')} · HomeConcept - Design &amp; Construção</td></tr>
 </table>
 <table style="border-collapse:collapse;font-family:Arial,sans-serif">
   <tr><td colspan="5" style="padding:11px 13px;background:#BE1E8C;color:#fff;font-size:13px;font-weight:700">Ocorrências do Mês — ${nomeMes} 2026</td></tr>
